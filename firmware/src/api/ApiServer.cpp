@@ -8,7 +8,8 @@ static WebServer* s_webServer = nullptr;
 ApiServer::ApiServer()
     : m_port(80)
     , m_running(false)
-    , m_server(nullptr) {}
+    , m_server(nullptr)
+    , m_streaming(false) {}
 
 ApiServer::~ApiServer() {
     deinit();
@@ -115,4 +116,25 @@ bool ApiServer::serveStaticFile(const char* path, const uint8_t* data, size_t le
 
 void ApiServer::registerSystemEndpoints() {
     if (!s_webServer) return;
+}
+
+bool ApiServer::beginStream(const char* contentType) {
+    if (!s_webServer || m_streaming) return false;
+    m_streaming = true;
+    s_webServer->setContentLength(CONTENT_LENGTH_UNKNOWN);
+    s_webServer->send(200, contentType, "");
+    return true;
+}
+
+bool ApiServer::streamChunk(const uint8_t* data, size_t len) {
+    if (!s_webServer || !m_streaming || !data || len == 0) return false;
+    s_webServer->sendContent_P((const char*)data, len);
+    return true;
+}
+
+bool ApiServer::endStream() {
+    if (!s_webServer || !m_streaming) return false;
+    s_webServer->sendContent("");
+    m_streaming = false;
+    return true;
 }

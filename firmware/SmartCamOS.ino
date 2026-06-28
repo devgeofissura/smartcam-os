@@ -13,6 +13,7 @@
  * Sprint 5: Dashboard Service — web interface served from PROGMEM.
  * Sprint 6: REST API — /network, /logger, /camera, /api/info endpoints.
  * Sprint 7: Camera Engine — OV2640 init, capture, JPEG config.
+ * Sprint 8: MJPEG Streaming — /camera/stream endpoint.
  */
 
 #include <Arduino.h>
@@ -127,7 +128,7 @@ void setup() {
     Serial.begin(115200);
     delay(100);
     Serial.println();
-    Serial.println(F("SmartCam OS v0.7.0 Sprint 7 - Camera Engine"));
+    Serial.println(F("SmartCam OS v0.8.0 Sprint 8 - MJPEG Streaming"));
     Serial.println(F("Platform: ESP32-S3 / T-SIMCAM v1.6"));
 
     g_systemState = SystemState::Init;

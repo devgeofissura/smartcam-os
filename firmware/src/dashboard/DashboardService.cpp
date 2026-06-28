@@ -5,6 +5,7 @@
 #include "../core/camera/CameraEngine.h"
 #include <WiFi.h>
 #include <esp_heap_caps.h>
+#include <esp_camera.h>
 
 static DashboardService* s_instance = nullptr;
 
@@ -48,6 +49,15 @@ static const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <div class="card"><h3>Camera</h3><div id="cam-info"><p>No camera data</p></div></div>
 </div>
 </div>
+<div id="page-camera" style="display:none">
+<div class="card">
+<h3>Live Stream</h3>
+<img id="cam-stream" src="" style="width:100%;max-width:640px;border-radius:4px">
+</div>
+</div>
+<div id="page-motion" style="display:none"><div class="card"><h3>Motion Control</h3><p>Coming soon.</p></div></div>
+<div id="page-tracking" style="display:none"><div class="card"><h3>Target Tracking</h3><p>Coming soon.</p></div></div>
+<div id="page-settings" style="display:none"><div class="card"><h3>Settings</h3><p>Coming soon.</p></div></div>
 </main>
 </div>
 <script src="/app.js"></script>
@@ -130,11 +140,26 @@ const d = await r.json();
 document.getElementById('cam-info').innerHTML =
 '<table><tr><td>Status</td><td class="value">'+d.status+'</td></tr>'+
 '<tr><td>FPS</td><td class="value">'+d.fps+'</td></tr>'+
-'<tr><td>Resolution</td><td class="value">'+d.resolution+'</td></tr></table>';
+'<tr><td>Resolution</td><td class="value">'+d.resolution+'</td></tr></table>'+
+'<p><a href="/camera/stream" target="_blank">Open Stream</a></p>';
 } catch(e) {
 document.getElementById('cam-info').innerHTML='<p>Camera not available</p>';
 }
 }
+
+function navigate(page) {
+document.querySelectorAll('#main-nav a').forEach(l=>l.classList.remove('active'));
+document.querySelector('#main-nav a[data-page="'+page+'"]').classList.add('active');
+document.querySelectorAll('#content > div').forEach(d=>d.style.display='none');
+const el = document.getElementById('page-'+page);
+if (el) el.style.display='block';
+if (page==='camera') document.getElementById('cam-stream').src='/camera/stream';
+}
+document.querySelectorAll('#main-nav a').forEach(function(a){
+a.addEventListener('click',function(e){
+e.preventDefault(); navigate(this.dataset.page);
+});
+});
 
 function refresh() { loadSystemInfo(); loadNetworkInfo(); loadCameraInfo(); }
 setInterval(refresh, 3000);
@@ -203,6 +228,10 @@ static void handleCameraInfoRoute() {
     if (s_instance) s_instance->handleCameraInfo();
 }
 
+static void handleCameraStreamRoute() {
+    if (s_instance) s_instance->handleCameraStream();
+}
+
 static void handleApiInfoRoute() {
     if (s_instance) s_instance->handleApiInfo();
 }
@@ -216,6 +245,7 @@ void DashboardService::registerRoutes() {
     apiServer.registerEndpoint("GET", "/network", handleNetworkInfoRoute);
     apiServer.registerEndpoint("GET", "/logger", handleLoggerRoute);
     apiServer.registerEndpoint("GET", "/camera", handleCameraInfoRoute);
+    apiServer.registerEndpoint("GET", "/camera/stream", handleCameraStreamRoute);
     apiServer.registerEndpoint("GET", "/api/info", handleApiInfoRoute);
 }
 
@@ -309,11 +339,49 @@ void DashboardService::handleCameraInfo() {
     apiServer.sendJson(200, buf);
 }
 
+void DashboardService::handleCameraStream() {
+    if (!cameraEngine.isInitialized()) {
+        apiServer.sendError(503, "Camera not initialized");
+        return;
+    }
+
+    const char* boundary = "frame";
+    char header[128];
+    snprintf(header, sizeof(header),
+        "multipart/x-mixed-replace;boundary=%s", boundary);
+
+    if (!apiServer.beginStream(header)) return;
+
+    unsigned long startTime = millis();
+    while (millis() - startTime < 60000) { // 60s max stream
+        camera_fb_t* fb = esp_camera_fb_get();
+        if (!fb) {
+            delay(10);
+            continue;
+        }
+
+        char partHeader[128];
+        int phLen = snprintf(partHeader, sizeof(partHeader),
+            "\r\n--%s\r\nContent-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n",
+            boundary, fb->len);
+
+        apiServer.streamChunk((uint8_t*)partHeader, phLen);
+        apiServer.streamChunk(fb->buf, fb->len);
+        esp_camera_fb_return(fb);
+    }
+
+    char trailer[32];
+    snprintf(trailer, sizeof(trailer), "\r\n--%s--\r\n", boundary);
+    apiServer.streamChunk((uint8_t*)trailer, strlen(trailer));
+    apiServer.endStream();
+}
+
 void DashboardService::handleApiInfo() {
     apiServer.sendJson(200,
         "{\"status\":\"ok\",\"endpoints\":["
         "\"/\",\"/index.html\",\"/style.css\",\"/app.js\","
-        "\"/system\",\"/network\",\"/logger\",\"/camera\",\"/api/info\""
+        "\"/system\",\"/network\",\"/logger\",\"/camera\","
+        "\"/camera/stream\",\"/api/info\""
         "]}");
 }
 

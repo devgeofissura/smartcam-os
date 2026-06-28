@@ -29,6 +29,7 @@ private:
     void handleNetworkInfo();
     void handleLogger();
     void handleCameraInfo();
+    void handleCameraStream();
     void handleApiInfo();
 
 public:

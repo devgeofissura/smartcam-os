@@ -24,10 +24,16 @@ public:
     // System info API (called by dashboard)
     void registerSystemEndpoints();
 
+    // Streaming support for MJPEG
+    bool beginStream(const char* contentType);
+    bool streamChunk(const uint8_t* data, size_t len);
+    bool endStream();
+
 private:
     int m_port;
     bool m_running;
     void* m_server; // WebServer*
+    bool m_streaming;
 
     bool serveStaticFile(const char* path, const uint8_t* data, size_t len, const char* mime);
 
