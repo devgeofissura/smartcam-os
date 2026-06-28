@@ -48,40 +48,41 @@ static const char INDEX_HTML[] PROGMEM = R"rawliteral(
     </div>
     <nav>
       <a href="#" data-page="dashboard" class="active">
-        <span class="nav-icon">&#9632;</span> Dashboard
+        <span class="nav-icon">&#9632;</span> <span data-i18n="nav_dashboard">Painel</span>
       </a>
       <a href="#" data-page="camera">
-        <span class="nav-icon">&#9678;</span> Camera
+        <span class="nav-icon">&#9678;</span> <span data-i18n="nav_camera">Câmera</span>
       </a>
       <a href="#" data-page="motion">
-        <span class="nav-icon">&#9650;</span> Motion
+        <span class="nav-icon">&#9650;</span> <span data-i18n="nav_motion">Motor</span>
       </a>
       <a href="#" data-page="tracking">
-        <span class="nav-icon">&#9673;</span> Tracking
+        <span class="nav-icon">&#9673;</span> <span data-i18n="nav_tracking">Rastreio</span>
       </a>
       <a href="#" data-page="settings">
-        <span class="nav-icon">&#9881;</span> Settings
+        <span class="nav-icon">&#9881;</span> <span data-i18n="nav_settings">Config</span>
       </a>
     </nav>
     <div class="sidebar-footer">
-      <span id="connection-status" class="disconnected">&#9679; Offline</span>
+      <div class="lang-switch"><button class="lang-btn active" data-lang="pt">PT</button><button class="lang-btn" data-lang="en">EN</button></div>
+      <span id="connection-status" class="disconnected">&#9679; <span data-i18n="offline">Offline</span></span>
     </div>
   </aside>
   <main id="content">
     <header class="page-header">
-      <h1 id="page-title">Dashboard</h1>
+      <h1 id="page-title" data-i18n="page_dashboard">Painel</h1>
     </header>
     <div id="page-dashboard">
       <div class="grid">
-        <div class="card"><div class="card-header"><span class="card-icon">&#9881;</span><h3>System</h3></div><div id="sys-info" class="card-body"><p>Loading...</p></div></div>
-        <div class="card"><div class="card-header"><span class="card-icon">&#9783;</span><h3>Memory</h3></div><div id="mem-info" class="card-body"><p>Loading...</p></div></div>
-        <div class="card"><div class="card-header"><span class="card-icon">&#9730;</span><h3>Network</h3></div><div id="net-info" class="card-body"><p>Loading...</p></div></div>
-        <div class="card"><div class="card-header"><span class="card-icon">&#128247;</span><h3>Camera</h3></div><div id="cam-info" class="card-body"><p>No camera data</p></div></div>
+        <div class="card"><div class="card-header"><span class="card-icon">&#9881;</span><h3 data-i18n="card_system">Sistema</h3></div><div id="sys-info" class="card-body"><p data-i18n="loading">Carregando...</p></div></div>
+        <div class="card"><div class="card-header"><span class="card-icon">&#9783;</span><h3 data-i18n="card_memory">Memória</h3></div><div id="mem-info" class="card-body"><p data-i18n="loading">Carregando...</p></div></div>
+        <div class="card"><div class="card-header"><span class="card-icon">&#9730;</span><h3 data-i18n="card_network">Rede</h3></div><div id="net-info" class="card-body"><p data-i18n="loading">Carregando...</p></div></div>
+        <div class="card"><div class="card-header"><span class="card-icon">&#128247;</span><h3 data-i18n="card_camera">Câmera</h3></div><div id="cam-info" class="card-body"><p data-i18n="no_camera">Sem dados da câmera</p></div></div>
       </div>
     </div>
     <div id="page-camera" style="display:none">
       <div class="card">
-        <div class="card-header"><span class="card-icon">&#128247;</span><h3>Live Stream</h3></div>
+        <div class="card-header"><span class="card-icon">&#128247;</span><h3 data-i18n="live_stream">Stream ao Vivo</h3></div>
         <div class="card-body stream-container">
           <img id="cam-stream" src="" alt="Camera Stream">
         </div>
@@ -89,68 +90,68 @@ static const char INDEX_HTML[] PROGMEM = R"rawliteral(
     </div>
     <div id="page-motion" style="display:none">
       <div class="card">
-        <div class="card-header"><span class="card-icon">&#9650;</span><h3>Axis Control</h3></div>
+        <div class="card-header"><span class="card-icon">&#9650;</span><h3 data-i18n="axis_control">Controle do Eixo</h3></div>
         <div class="card-body">
           <div class="info-grid">
-            <div class="info-item"><span class="info-label">Position</span><span class="info-value" id="mot-pos">0</span></div>
-            <div class="info-item"><span class="info-label">Speed</span><span class="info-value" id="mot-speed">0</span></div>
-            <div class="info-item"><span class="info-label">Homed</span><span class="info-value" id="mot-homed">-</span></div>
-            <div class="info-item"><span class="info-label">Moving</span><span class="info-value" id="mot-moving">-</span></div>
-            <div class="info-item"><span class="info-label">Enabled</span><span class="info-value" id="mot-enabled">-</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="position">Posição</span><span class="info-value" id="mot-pos">0</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="speed">Velocidade</span><span class="info-value" id="mot-speed">0</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="homed">Origem</span><span class="info-value" id="mot-homed">-</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="moving">Movendo</span><span class="info-value" id="mot-moving">-</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="enabled">Ativo</span><span class="info-value" id="mot-enabled">-</span></div>
           </div>
           <div class="btn-group">
-            <button class="btn btn-primary" onclick="sendMotion('home',0)">Home</button>
+            <button class="btn btn-primary" onclick="sendMotion('home',0)" data-i18n="home">Home</button>
             <button class="btn btn-secondary" onclick="sendMotion('move',0,100)">+100</button>
             <button class="btn btn-secondary" onclick="sendMotion('move',0,-100)">-100</button>
-            <button class="btn btn-danger" onclick="sendMotion('stop',0)">Stop</button>
-            <button class="btn btn-success" onclick="sendMotion('enable',0,1)">Enable</button>
-            <button class="btn btn-warning" onclick="sendMotion('enable',0,0)">Disable</button>
+            <button class="btn btn-danger" onclick="sendMotion('stop',0)" data-i18n="stop">Parar</button>
+            <button class="btn btn-success" onclick="sendMotion('enable',0,1)" data-i18n="enable">Ativar</button>
+            <button class="btn btn-warning" onclick="sendMotion('enable',0,0)" data-i18n="disable">Desat.</button>
           </div>
         </div>
       </div>
     </div>
     <div id="page-tracking" style="display:none">
       <div class="card">
-        <div class="card-header"><span class="card-icon">&#9673;</span><h3>Object Tracking</h3></div>
+        <div class="card-header"><span class="card-icon">&#9673;</span><h3 data-i18n="object_tracking">Rastreio de Objeto</h3></div>
         <div class="card-body">
           <div class="info-grid">
-            <div class="info-item"><span class="info-label">Target</span><span class="info-value" id="track-target">person</span></div>
-            <div class="info-item"><span class="info-label">Status</span><span class="info-value" id="track-status">idle</span></div>
-            <div class="info-item"><span class="info-label">Correction</span><span class="info-value" id="track-correction">0.0000</span></div>
-            <div class="info-item"><span class="info-label">Position</span><span class="info-value" id="track-pos">(0, 0)</span></div>
-            <div class="info-item"><span class="info-label">Size</span><span class="info-value" id="track-size">0x0</span></div>
-            <div class="info-item"><span class="info-label">Confidence</span><span class="info-value" id="track-conf">0.00</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="target">Alvo</span><span class="info-value" id="track-target">person</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="status">Status</span><span class="info-value" id="track-status">parado</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="correction">Correção</span><span class="info-value" id="track-correction">0.0000</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="position">Posição</span><span class="info-value" id="track-pos">(0, 0)</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="size">Tamanho</span><span class="info-value" id="track-size">0x0</span></div>
+            <div class="info-item"><span class="info-label" data-i18n="confidence">Confiança</span><span class="info-value" id="track-conf">0.00</span></div>
           </div>
           <div class="btn-group">
-            <button class="btn btn-primary" onclick="trackAction('track-person')">Track Person</button>
-            <button class="btn btn-secondary" onclick="trackAction('track-color','red')">Track Red</button>
-            <button class="btn btn-danger" onclick="trackAction('stop')">Stop</button>
+            <button class="btn btn-primary" onclick="trackAction('track-person')" data-i18n="track_person">Rastrear Pessoa</button>
+            <button class="btn btn-secondary" onclick="trackAction('track-color','red')" data-i18n="track_red">Rastrear Vermelho</button>
+            <button class="btn btn-danger" onclick="trackAction('stop')" data-i18n="stop">Parar</button>
           </div>
         </div>
       </div>
     </div>
     <div id="page-settings" style="display:none">
       <div class="card">
-        <div class="card-header"><span class="card-icon">&#9730;</span><h3>WiFi Configuration</h3></div>
+        <div class="card-header"><span class="card-icon">&#9730;</span><h3 data-i18n="wifi_config">Configuração WiFi</h3></div>
         <div class="card-body">
           <div class="wifi-status-bar">
-            <span>Status:</span>
-            <span id="wifi-status">Loading...</span>
-            <button class="btn btn-sm" onclick="wifiStatus()">Refresh</button>
+            <span data-i18n="status_label">Status:</span>
+            <span id="wifi-status" data-i18n="loading">Carregando...</span>
+            <button class="btn btn-sm" onclick="wifiStatus()" data-i18n="refresh">Atualizar</button>
           </div>
           <div class="form-group">
-            <label for="wifi-networks">Network</label>
+            <label for="wifi-networks" data-i18n="network">Rede</label>
             <select id="wifi-networks">
-              <option value="">-- Select a network --</option>
+              <option value="" data-i18n="select_network">-- Selecione uma rede --</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="wifi-password">Password</label>
-            <input type="password" id="wifi-password" placeholder="Leave blank for open networks">
+            <label for="wifi-password" data-i18n="password">Senha</label>
+            <input type="password" id="wifi-password" placeholder="" data-i18n-placeholder="password_placeholder">
           </div>
           <div class="btn-group">
-            <button class="btn btn-primary" id="wifi-scan-btn" onclick="wifiScan()">Scan</button>
-            <button class="btn btn-success" id="wifi-connect-btn" onclick="wifiConnect()">Save &amp; Reboot</button>
+            <button class="btn btn-primary" id="wifi-scan-btn" onclick="wifiScan()" data-i18n="scan">Escanear</button>
+            <button class="btn btn-success" id="wifi-connect-btn" onclick="wifiConnect()" data-i18n="save_reboot">Salvar &amp; Reiniciar</button>
           </div>
           <div id="wifi-msg" class="msg"></div>
         </div>
@@ -194,7 +195,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 #sidebar nav a:hover{background:var(--current);color:var(--fg)}
 #sidebar nav a.active{background:var(--purple);color:var(--bg);font-weight:600}
 .nav-icon{font-size:.85rem;width:1.2rem;text-align:center}
-.sidebar-footer{padding:1rem;border-top:1px solid var(--current);font-size:.8rem}
+.sidebar-footer{padding:.75rem 1rem;border-top:1px solid var(--current);font-size:.8rem}
+.lang-switch{display:flex;margin-bottom:.5rem;border-radius:6px;overflow:hidden;border:1px solid var(--current)}
+.lang-btn{flex:1;padding:.25rem;border:none;background:transparent;color:var(--comment);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s}
+.lang-btn.active{background:var(--purple);color:var(--bg)}
+.lang-btn:hover:not(.active){background:var(--current);color:var(--fg)}
 #connection-status{display:flex;align-items:center;gap:.4rem}
 #connection-status.connected{color:var(--green)}
 #connection-status.disconnected{color:var(--red)}
@@ -241,7 +246,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 .msg.show{display:block}
 @media(max-width:768px){
 #sidebar{width:56px;overflow:hidden}
-.sidebar-header h2,#sidebar nav a span:not(.nav-icon),.sidebar-footer span{display:none}
+.sidebar-header h2,#sidebar nav a span:not(.nav-icon),.sidebar-footer span,.lang-btn{display:none}
 #sidebar nav a{justify-content:center;padding:.7rem 0}
 #sidebar nav a .nav-icon{font-size:1.1rem;width:auto}
 .sidebar-header{padding:.75rem;justify-content:center}
@@ -255,198 +260,268 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 static const char APP_JS[] PROGMEM = R"rawliteral(
 const API = window.location.origin;
 let ws = null;
-const pageNames = {dashboard:'Dashboard',camera:'Camera',motion:'Motion',tracking:'Tracking',settings:'Settings'};
+let currentLang = 'pt';
+
+const t = {
+pt:{
+nav_dashboard:'Painel',nav_camera:'Câmera',nav_motion:'Motor',nav_tracking:'Rastreio',nav_settings:'Config',
+page_dashboard:'Painel',page_camera:'Câmera',page_motion:'Motor',page_tracking:'Rastreio',page_settings:'Configurações',
+card_system:'Sistema',card_memory:'Memória',card_network:'Rede',card_camera:'Câmera',
+loading:'Carregando...',no_camera:'Sem dados da câmera',
+live_stream:'Stream ao Vivo',axis_control:'Controle do Eixo',
+position:'Posição',speed:'Velocidade',homed:'Origem',moving:'Movendo',enabled:'Ativo',
+home:'Home',stop:'Parar',enable:'Ativar',disable:'Desat.',
+object_tracking:'Rastreio de Objeto',target:'Alvo',status:'Status',correction:'Correção',
+size:'Tamanho',confidence:'Confiança',
+track_person:'Rastrear Pessoa',track_red:'Rastrear Vermelho',
+wifi_config:'Configuração WiFi',status_label:'Status:',network:'Rede',password:'Senha',
+password_placeholder:'Deixe em branco para redes abertas',
+select_network:'-- Selecione uma rede --',
+scan:'Escanear',save_reboot:'Salvar & Reiniciar',refresh:'Atualizar',
+online:'Online',offline:'Offline',
+scanning:'Escanendo...',scan_fail:'Falha no scan',no_networks:'Nenhuma rede encontrada',
+nets_found:' redes encontradas',select_err:'Selecione uma rede',
+saving:'Salvando e reiniciando...',saved:'Config salva, reiniciando...',
+started:' iniciado',err_data:'Erro ao carregar',not_conn:'Desconectado',
+stream:'Abrir Stream',locked:'travado',searching:'buscando',idle:'parado',
+uptime:'Ativo há',cpu:'CPU',sketch:'Sketch',free_sketch:'Sketch Livre',
+free_heap:'Heap Livre',min_heap:'Heap Mín',free_psram:'PSRAM Livre',total_psram:'PSRAM Total',
+ip:'IP',ssid:'Rede',signal:'Sinal',mac:'MAC',
+status_cam:'Status',fps:'FPS',resolution:'Resolução',
+position_unit:'Posição',correction_val:'Correção'
+},
+en:{
+nav_dashboard:'Dashboard',nav_camera:'Camera',nav_motion:'Motion',nav_tracking:'Tracking',nav_settings:'Settings',
+page_dashboard:'Dashboard',page_camera:'Camera',page_motion:'Motion',page_tracking:'Tracking',page_settings:'Settings',
+card_system:'System',card_memory:'Memory',card_network:'Network',card_camera:'Camera',
+loading:'Loading...',no_camera:'No camera data',
+live_stream:'Live Stream',axis_control:'Axis Control',
+position:'Position',speed:'Speed',homed:'Homed',moving:'Moving',enabled:'Enabled',
+home:'Home',stop:'Stop',enable:'Enable',disable:'Disable',
+object_tracking:'Object Tracking',target:'Target',status:'Status',correction:'Correction',
+size:'Size',confidence:'Confidence',
+track_person:'Track Person',track_red:'Track Red',
+wifi_config:'WiFi Configuration',status_label:'Status:',network:'Network',password:'Password',
+password_placeholder:'Leave blank for open networks',
+select_network:'-- Select a network --',
+scan:'Scan',save_reboot:'Save & Reboot',refresh:'Refresh',
+online:'Online',offline:'Offline',
+scanning:'Scanning...',scan_fail:'Scan failed',no_networks:'No networks found',
+nets_found:' networks found',select_err:'Select a network',
+saving:'Saving and rebooting...',saved:'Config saved, rebooting...',
+started:' started',err_data:'Error loading data',not_conn:'Not connected',
+stream:'Open Stream',locked:'locked',searching:'searching',idle:'idle',
+uptime:'Uptime',cpu:'CPU',sketch:'Sketch',free_sketch:'Free Sketch',
+free_heap:'Free Heap',min_heap:'Min Heap',free_psram:'Free PSRAM',total_psram:'Total PSRAM',
+ip:'IP',ssid:'SSID',signal:'Signal',mac:'MAC',
+status_cam:'Status',fps:'FPS',resolution:'Resolution',
+position_unit:'Position',correction_val:'Correction'
+}
+};
+
+function _(key) { return (t[currentLang]&&t[currentLang][key])||key; }
+
+function applyLang(lang) {
+currentLang=lang;
+document.querySelectorAll('[data-i18n]').forEach(function(el){
+var key=el.dataset.i18n;
+if (t[lang]&&t[lang][key]) el.textContent=t[lang][key];
+});
+document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+var key=el.dataset.i18nPlaceholder;
+if (t[lang]&&t[lang][key]) el.placeholder=t[lang][key];
+});
+document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+try{localStorage.setItem('geofissura-lang',lang);}catch(e){}
+var titleEl=document.getElementById('page-title');
+var visible=document.querySelector('#content > div[id^="page-"]:not([style*="none"])');
+if (visible&&titleEl){
+var pid=visible.id.replace('page-','');
+var tk='page_'+pid;
+if (t[lang]&&t[lang][tk]) titleEl.textContent=t[lang][tk];
+}
+}
 
 function msg(text,type) {
-const el = document.getElementById('wifi-msg');
+var el=document.getElementById('wifi-msg');
 if (!el) return;
-el.textContent = text;
-el.className = 'msg show';
-if (type==='error') el.style.color='var(--red)';
-else el.style.color='var(--fg)';
+el.textContent=text; el.className='msg show';
+el.style.color=(type==='error')?'var(--red)':'var(--fg)';
 }
 
-async function loadSystemInfo() {
-try {
-const r = await fetch(API + '/system');
-const d = await r.json();
-document.getElementById('sys-info').innerHTML =
-'<div class="info-grid"><div class="info-item"><span class="info-label">Uptime</span><span class="info-value">'+d.uptime+'s</span></div>'+
-'<div class="info-item"><span class="info-label">CPU</span><span class="info-value">'+d.cpuFreq+' MHz</span></div>'+
-'<div class="info-item"><span class="info-label">Sketch</span><span class="info-value">'+d.sketchSize+' B</span></div>'+
-'<div class="info-item"><span class="info-label">Free Sketch</span><span class="info-value">'+d.freeSketch+' B</span></div></div>';
-document.getElementById('mem-info').innerHTML =
-'<div class="info-grid"><div class="info-item"><span class="info-label">Free Heap</span><span class="info-value">'+formatBytes(d.freeHeap)+'</span></div>'+
-'<div class="info-item"><span class="info-label">Min Heap</span><span class="info-value">'+formatBytes(d.minHeap)+'</span></div>'+
-'<div class="info-item"><span class="info-label">Free PSRAM</span><span class="info-value">'+formatBytes(d.freePsram)+'</span></div>'+
-'<div class="info-item"><span class="info-label">Total PSRAM</span><span class="info-value">'+formatBytes(d.totalPsram)+'</span></div></div>';
-} catch(e) {
-document.getElementById('sys-info').innerHTML='<p>Error loading data</p>';
-document.getElementById('mem-info').innerHTML='<p>Error loading data</p>';
-}
-}
-
-function formatBytes(b) {
+function formatBytes(b){
 if (!b||b===0) return '0 B';
-const units = ['B','KB','MB'];
-let i = 0;
-let v = b;
-while (v>=1024 && i<units.length-1) { v/=1024; i++; }
+var units=['B','KB','MB']; var i=0; var v=b;
+while (v>=1024&&i<units.length-1){v/=1024;i++;}
 return v.toFixed(1)+' '+units[i];
 }
 
-async function loadNetworkInfo() {
-try {
-const r = await fetch(API + '/network');
-const d = await r.json();
-document.getElementById('net-info').innerHTML =
-'<div class="info-grid"><div class="info-item"><span class="info-label">IP</span><span class="info-value">'+d.ip+'</span></div>'+
-'<div class="info-item"><span class="info-label">SSID</span><span class="info-value">'+d.ssid+'</span></div>'+
-'<div class="info-item"><span class="info-label">Signal</span><span class="info-value">'+d.rssi+' dBm</span></div>'+
-'<div class="info-item"><span class="info-label">MAC</span><span class="info-value">'+d.mac+'</span></div></div>';
+async function loadSystemInfo(){
+try{
+var r=await fetch(API+'/system'); var d=await r.json();
+var upt=_('uptime'),cpu=_('cpu'),sk=_('sketch'),fsk=_('free_sketch');
+var fh=_('free_heap'),mh=_('min_heap'),fp=_('free_psram'),tp=_('total_psram');
+document.getElementById('sys-info').innerHTML=
+'<div class="info-grid">'+
+'<div class="info-item"><span class="info-label">'+upt+'</span><span class="info-value">'+d.uptime+'s</span></div>'+
+'<div class="info-item"><span class="info-label">'+cpu+'</span><span class="info-value">'+d.cpuFreq+' MHz</span></div>'+
+'<div class="info-item"><span class="info-label">'+sk+'</span><span class="info-value">'+d.sketchSize+' B</span></div>'+
+'<div class="info-item"><span class="info-label">'+fsk+'</span><span class="info-value">'+d.freeSketch+' B</span></div></div>';
+document.getElementById('mem-info').innerHTML=
+'<div class="info-grid">'+
+'<div class="info-item"><span class="info-label">'+fh+'</span><span class="info-value">'+formatBytes(d.freeHeap)+'</span></div>'+
+'<div class="info-item"><span class="info-label">'+mh+'</span><span class="info-value">'+formatBytes(d.minHeap)+'</span></div>'+
+'<div class="info-item"><span class="info-label">'+fp+'</span><span class="info-value">'+formatBytes(d.freePsram)+'</span></div>'+
+'<div class="info-item"><span class="info-label">'+tp+'</span><span class="info-value">'+formatBytes(d.totalPsram)+'</span></div></div>';
+}catch(e){
+var err=_('err_data');
+document.getElementById('sys-info').innerHTML='<p>'+err+'</p>';
+document.getElementById('mem-info').innerHTML='<p>'+err+'</p>';
+}
+}
+
+async function loadNetworkInfo(){
+try{
+var r=await fetch(API+'/network'); var d=await r.json();
+var ip=_('ip'),ssid=_('ssid'),sig=_('signal'),mac=_('mac');
+document.getElementById('net-info').innerHTML=
+'<div class="info-grid">'+
+'<div class="info-item"><span class="info-label">'+ip+'</span><span class="info-value">'+d.ip+'</span></div>'+
+'<div class="info-item"><span class="info-label">'+ssid+'</span><span class="info-value">'+d.ssid+'</span></div>'+
+'<div class="info-item"><span class="info-label">'+sig+'</span><span class="info-value">'+d.rssi+' dBm</span></div>'+
+'<div class="info-item"><span class="info-label">'+mac+'</span><span class="info-value">'+d.mac+'</span></div></div>';
 updateStatus(true);
-} catch(e) {
-document.getElementById('net-info').innerHTML='<p>Not connected</p>';
+}catch(e){
+document.getElementById('net-info').innerHTML='<p>'+_('not_conn')+'</p>';
 updateStatus(false);
 }
 }
 
-async function loadCameraInfo() {
-try {
-const r = await fetch(API + '/camera');
-const d = await r.json();
-document.getElementById('cam-info').innerHTML =
-'<div class="info-grid"><div class="info-item"><span class="info-label">Status</span><span class="info-value">'+d.status+'</span></div>'+
-'<div class="info-item"><span class="info-label">FPS</span><span class="info-value">'+d.fps+'</span></div>'+
-'<div class="info-item"><span class="info-label">Resolution</span><span class="info-value">'+d.resolution+'</span></div></div>'+
-'<div class="btn-group"><a class="btn btn-primary" href="/camera/stream" target="_blank">Open Stream</a></div>';
-} catch(e) {
-document.getElementById('cam-info').innerHTML='<p>Camera not available</p>';
+async function loadCameraInfo(){
+try{
+var r=await fetch(API+'/camera'); var d=await r.json();
+var sc=_('status_cam'),fps=_('fps'),res=_('resolution'),str=_('stream');
+document.getElementById('cam-info').innerHTML=
+'<div class="info-grid">'+
+'<div class="info-item"><span class="info-label">'+sc+'</span><span class="info-value">'+d.status+'</span></div>'+
+'<div class="info-item"><span class="info-label">'+fps+'</span><span class="info-value">'+d.fps+'</span></div>'+
+'<div class="info-item"><span class="info-label">'+res+'</span><span class="info-value">'+d.resolution+'</span></div></div>'+
+'<div class="btn-group"><a class="btn btn-primary" href="/camera/stream" target="_blank">'+str+'</a></div>';
+}catch(e){
+document.getElementById('cam-info').innerHTML='<p>'+_('no_camera')+'</p>';
 }
 }
 
-function navigate(page) {
+function navigate(page){
 document.querySelectorAll('#sidebar nav a').forEach(function(l){l.classList.remove('active');});
-const link = document.querySelector('#sidebar nav a[data-page="'+page+'"]');
+var link=document.querySelector('#sidebar nav a[data-page="'+page+'"]');
 if (link) link.classList.add('active');
 document.querySelectorAll('#content > div[id^="page-"]').forEach(function(d){d.style.display='none';});
-const el = document.getElementById('page-'+page);
+var el=document.getElementById('page-'+page);
 if (el) el.style.display='block';
-document.getElementById('page-title').textContent = pageNames[page]||page;
-if (page==='camera') {
-const img = document.getElementById('cam-stream');
-if (img) img.src = '/camera/stream?'+Date.now();
+var tk='page_'+page;
+document.getElementById('page-title').textContent=_(tk);
+if (page==='camera'){var img=document.getElementById('cam-stream');if(img)img.src='/camera/stream?'+Date.now();}
+if (page==='settings'){wifiStatus();wifiScan();}
 }
-if (page==='settings') { wifiStatus(); wifiScan(); }
-}
+
 document.querySelectorAll('#sidebar nav a').forEach(function(a){
-a.addEventListener('click',function(e){
-e.preventDefault(); navigate(this.dataset.page);
-});
+a.addEventListener('click',function(e){e.preventDefault();navigate(this.dataset.page);});
 });
 
-async function loadMotionInfo() {
-try {
-const r = await fetch(API + '/motion');
-const d = await r.json();
-if (d.axes && d.axes.length>0) {
-const a = d.axes[0];
-document.getElementById('mot-pos').textContent = a.position;
-document.getElementById('mot-speed').textContent = a.speed.toFixed(1);
-document.getElementById('mot-homed').textContent = a.homed;
-document.getElementById('mot-moving').textContent = a.moving;
-document.getElementById('mot-enabled').textContent = a.enabled;
-}} catch(e) {}
+document.querySelectorAll('.lang-btn').forEach(function(b){
+b.addEventListener('click',function(){applyLang(this.dataset.lang);});
+});
+
+async function loadMotionInfo(){
+try{
+var r=await fetch(API+'/motion');var d=await r.json();
+if (d.axes&&d.axes.length>0){var a=d.axes[0];
+document.getElementById('mot-pos').textContent=a.position;
+document.getElementById('mot-speed').textContent=a.speed.toFixed(1);
+document.getElementById('mot-homed').textContent=a.homed;
+document.getElementById('mot-moving').textContent=a.moving;
+document.getElementById('mot-enabled').textContent=a.enabled;}
+}catch(e){}
 }
 
-async function sendMotion(cmd, axis, val) {
-const body = 'cmd='+cmd+'&axis='+axis+(val!==undefined?'&value='+val:'');
-try {
-await fetch(API + '/motion', {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
-loadMotionInfo();
-} catch(e) { console.error(e); }
+async function sendMotion(cmd,axis,val){
+var body='cmd='+cmd+'&axis='+axis+(val!==undefined?'&value='+val:'');
+try{await fetch(API+'/motion',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});loadMotionInfo();}catch(e){}
 }
 
-async function trackAction(action, label) {
-let body = 'action='+action;
-if (label) body += '&label='+label;
-try {
-const r = await fetch(API + '/tracking', {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
-const d = await r.json();
-if (d.status==='ok') msg(action + ' started');
-} catch(e) { console.error(e); }
+async function trackAction(action,label){
+var body='action='+action;if(label)body+='&label='+label;
+try{var r=await fetch(API+'/tracking',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});var d=await r.json();if(d.status==='ok')msg(action+_('started'));}catch(e){}
 }
 
-async function wifiStatus() {
-try {
-const r = await fetch('/api/wifi/status');
-const d = await r.json();
-document.getElementById('wifi-status').textContent = d.mode + ' (' + d.ip + (d.ssid ? ', ' + d.ssid : '') + ')';
-} catch(e) {}
+async function wifiStatus(){
+try{
+var r=await fetch('/api/wifi/status');var d=await r.json();
+document.getElementById('wifi-status').textContent=d.mode+' ('+d.ip+(d.ssid?', '+d.ssid:'')+')';
+}catch(e){}
 }
 
-async function wifiScan() {
-const btn = document.getElementById('wifi-scan-btn');
-if (!btn) return;
-btn.textContent='Scanning...'; btn.disabled=true;
-try {
-const r = await fetch('/api/wifi/scan');
-const d = await r.json();
-const sel = document.getElementById('wifi-networks');
-sel.innerHTML = '<option value="">-- Select network --</option>';
-if (d.networks && d.networks.length>0) {
+async function wifiScan(){
+var btn=document.getElementById('wifi-scan-btn');if(!btn)return;
+btn.textContent=_('scanning');btn.disabled=true;
+try{
+var r=await fetch('/api/wifi/scan');var d=await r.json();
+var sel=document.getElementById('wifi-networks');
+sel.innerHTML='<option value="">'+_('select_network')+'</option>';
+if (d.networks&&d.networks.length>0){
 d.networks.forEach(function(n){
-const opt = document.createElement('option');
-opt.value = n.ssid;
-opt.textContent = n.ssid + ' (' + (n.rssi<-70?'&#9785;':n.rssi<-50?'&#9786;':'&#9787;') + ' ' + n.rssi + ' dBm)' + (n.open ? ' [open]' : '');
+var opt=document.createElement('option');
+opt.value=n.ssid;
+opt.textContent=n.ssid+' ('+(n.rssi<-70?'\\u2639':n.rssi<-50?'\\u263A':'\\u263B')+' '+n.rssi+' dBm)'+(n.open?' [open]':'');
 sel.appendChild(opt);
 });
-msg(d.networks.length + ' networks found');
-} else {
-msg('No networks found','error');
-}} catch(e) {
-msg('Scan failed','error');
-}
-btn.textContent='Scan'; btn.disabled=false;
+msg(d.networks.length+_('nets_found'));
+}else{msg(_('no_networks'),'error');}
+}catch(e){msg(_('scan_fail'),'error');}
+btn.textContent=_('scan');btn.disabled=false;
 }
 
-async function wifiConnect() {
-const ssid = document.getElementById('wifi-networks').value;
-const pw = document.getElementById('wifi-password').value;
-if (!ssid) { msg('Select a network','error'); return; }
-msg('Saving and rebooting...');
-try {
-const body = 'ssid='+encodeURIComponent(ssid)+'&password='+encodeURIComponent(pw);
-await fetch('/api/wifi/config', {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
-} catch(e) { msg('Config saved, rebooting...'); }
-setTimeout(function(){ window.location.reload(); }, 3000);
+async function wifiConnect(){
+var ssid=document.getElementById('wifi-networks').value;
+var pw=document.getElementById('wifi-password').value;
+if(!ssid){msg(_('select_err'),'error');return;}
+msg(_('saving'));
+try{
+var body='ssid='+encodeURIComponent(ssid)+'&password='+encodeURIComponent(pw);
+await fetch('/api/wifi/config',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+}catch(e){msg(_('saved'));}
+setTimeout(function(){window.location.reload();},3000);
 }
 
 setInterval(function(){
 fetch('/tracking').then(function(r){return r.json();}).then(function(d){
-const s = document.getElementById('track-status');
-const c = document.getElementById('track-correction');
-const p = document.getElementById('track-pos');
-const sz = document.getElementById('track-size');
-const cf = document.getElementById('track-conf');
-if (s) s.textContent = d.locked ? 'locked' : 'searching';
-if (c) c.textContent = d.correction.toFixed(4);
-if (p) p.textContent = '('+d.tx+', '+d.ty+')';
-if (sz) sz.textContent = d.tw+'x'+d.th;
-if (cf) cf.textContent = d.conf.toFixed(2);
+var s=document.getElementById('track-status');
+var c=document.getElementById('track-correction');
+var p=document.getElementById('track-pos');
+var sz=document.getElementById('track-size');
+var cf=document.getElementById('track-conf');
+if(s)s.textContent=d.locked?_('locked'):d.target?_(d.target):_('searching');
+if(c)c.textContent=d.correction.toFixed(4);
+if(p)p.textContent='('+d.tx+', '+d.ty+')';
+if(sz)sz.textContent=d.tw+'x'+d.th;
+if(cf)cf.textContent=d.conf.toFixed(2);
 }).catch(function(){});
 },1000);
 
-function updateStatus(connected) {
-const el = document.getElementById('connection-status');
-if (!el) return;
-if (connected) { el.innerHTML='&#9679; Online'; el.className='connected'; }
-else { el.innerHTML='&#9679; Offline'; el.className='disconnected'; }
+function updateStatus(connected){
+var el=document.getElementById('connection-status');if(!el)return;
+if(connected){el.innerHTML='&#9679; '+_('online');el.className='connected';}
+else{el.innerHTML='&#9679; '+_('offline');el.className='disconnected';}
 }
 
-function refresh() { loadSystemInfo(); loadNetworkInfo(); loadCameraInfo(); loadMotionInfo(); }
-setInterval(refresh, 5000);
-document.addEventListener('DOMContentLoaded', function(){ navigate('dashboard'); });
+function refresh(){loadSystemInfo();loadNetworkInfo();loadCameraInfo();loadMotionInfo();}
+setInterval(refresh,5000);
+document.addEventListener('DOMContentLoaded',function(){
+var saved=null;try{saved=localStorage.getItem('geofissura-lang');}catch(e){}
+applyLang(saved||'pt');
+navigate('dashboard');
+});
 )rawliteral";
 
 // ============================================================
