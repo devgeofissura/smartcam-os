@@ -14,6 +14,7 @@
  * Sprint 6: REST API — /network, /logger, /camera, /api/info endpoints.
  * Sprint 7: Camera Engine — OV2640 init, capture, JPEG config.
  * Sprint 8: MJPEG Streaming — /camera/stream endpoint.
+ * Sprint 9: Motion Engine — DM556D driver, STEP/DIR, HOME, STOP.
  */
 
 #include <Arduino.h>
@@ -128,7 +129,7 @@ void setup() {
     Serial.begin(115200);
     delay(100);
     Serial.println();
-    Serial.println(F("SmartCam OS v0.8.0 Sprint 8 - MJPEG Streaming"));
+    Serial.println(F("SmartCam OS v0.9.0 Sprint 9 - Motion Engine"));
     Serial.println(F("Platform: ESP32-S3 / T-SIMCAM v1.6"));
 
     g_systemState = SystemState::Init;
@@ -187,7 +188,24 @@ void setupCamera()   {
         loggerService.warning("Camera", "Camera initialization failed");
     }
 }
-void setupMotion()   { motionEngine.begin(); }
+void setupMotion()   {
+    motionEngine.begin();
+    AxisConfig panAxis;
+    panAxis.stepPin = 39;
+    panAxis.dirPin = 40;
+    panAxis.enablePin = 41;
+    panAxis.homePin = -1;
+    panAxis.stepsPerDegree = 16.0f * 200.0f / 360.0f;
+    panAxis.maxSpeed = 5000.0f;
+    panAxis.acceleration = 1000.0f;
+    panAxis.microSteps = 16;
+    if (motionEngine.addAxis(panAxis)) {
+        motionEngine.enableAxis(0, true);
+        loggerService.info("Motion", "Pan axis initialized");
+    } else {
+        loggerService.warning("Motion", "Pan axis init failed");
+    }
+}
 void setupVision()   { visionEngine.begin(); }
 void setupTracking() { trackingEngine.begin(); }
 void setupAI()       { detectionEngine.begin(); }

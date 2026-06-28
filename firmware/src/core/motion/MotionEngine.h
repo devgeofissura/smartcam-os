@@ -32,6 +32,15 @@ public:
     AxisState getAxisState(int axisIndex) const;
 
     const char* name() const override { return "MotionEngine"; }
+
+private:
+    static const int MAX_AXES = 4;
+    class AxisController* m_axes[MAX_AXES];
+    int m_axisCount;
+
+public:
+    MotionEngine();
+    ~MotionEngine();
 };
 
 #endif
