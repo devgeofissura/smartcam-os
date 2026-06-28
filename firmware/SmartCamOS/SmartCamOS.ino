@@ -262,28 +262,30 @@ void setupAI()       {
     redConfig.minBlobArea = 100;
     redConfig.label = "red";
 
-    ColorDetector* redDetector = new ColorDetector(redConfig);
-    if (redDetector && detectionEngine.registerDetector("red", redDetector)) {
-        detectionEngine.setActiveDetector("red");
-        loggerService.info("AI", "Red color detector registered");
-    } else {
-        delete redDetector;
-        loggerService.warning("AI", "Red color detector registration failed");
-    }
+    // DISABLED: heap_caps_malloc(SPIRAM) triggers xQueueSemaphoreTake assert on S3 rev0.2
+    // ColorDetector* redDetector = new ColorDetector(redConfig);
+    // if (redDetector && detectionEngine.registerDetector("red", redDetector)) {
+    //     detectionEngine.setActiveDetector("red");
+    //     loggerService.info("AI", "Red color detector registered");
+    // } else {
+    //     delete redDetector;
+    //     loggerService.warning("AI", "Red color detector registration failed");
+    // }
 
-    PersonDetector* personDetector = new PersonDetector();
-    if (personDetector && detectionEngine.registerDetector("person", personDetector)) {
-        loggerService.info("AI", "Person detector registered");
-    } else {
-        delete personDetector;
-        loggerService.warning("AI", "Person detector registration failed");
-    }
+    // PersonDetector* personDetector = new PersonDetector();
+    // if (personDetector && detectionEngine.registerDetector("person", personDetector)) {
+    //     loggerService.info("AI", "Person detector registered");
+    // } else {
+    //     delete personDetector;
+    //     loggerService.warning("AI", "Person detector registration failed");
+    // }
 }
 void setupBehavior() { behaviorEngine.begin(); }
 void setupApp() {
     personTracker.begin();
-    personTracker.startTrackingPerson();
-    loggerService.info("App", "PersonTracker v1.0 ready — tracking person");
+    // DISABLED: triggers heap_caps_malloc(SPIRAM) -> xQueueSemaphoreTake assert
+    // personTracker.startTrackingPerson();
+    loggerService.info("App", "PersonTracker v1.0 ready (detectors DISABLED)");
 }
 void setupNetwork()  { networkService.init(); }
 void setupStorage()  { storageService.init(); }
