@@ -114,7 +114,11 @@ static const char INDEX_HTML[] PROGMEM = R"rawliteral(
       <div class="card">
         <div class="card-header"><span class="card-icon">&#9673;</span><h3 data-i18n="object_tracking">Rastreio de Objeto</h3></div>
         <div class="card-body">
-          <div class="info-grid">
+          <div class="stream-container" style="position:relative">
+            <img id="track-stream" src="" alt="Tracking Stream" style="max-width:100%">
+            <canvas id="track-canvas" style="position:absolute;top:0;left:0;pointer-events:none"></canvas>
+          </div>
+          <div class="info-grid" style="margin-top:.75rem">
             <div class="info-item"><span class="info-label" data-i18n="target">Alvo</span><span class="info-value" id="track-target">person</span></div>
             <div class="info-item"><span class="info-label" data-i18n="status">Status</span><span class="info-value" id="track-status">parado</span></div>
             <div class="info-item"><span class="info-label" data-i18n="correction">Correção</span><span class="info-value" id="track-correction">0.0000</span></div>
@@ -233,8 +237,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubunt
 .btn-warning:hover{background:#e6e47c}
 .btn-sm{padding:.3rem .6rem;font-size:.75rem;background:var(--current);color:var(--fg)}
 .btn-sm:hover{background:var(--comment)}
-.stream-container{text-align:center}
-#cam-stream{max-width:100%;border-radius:6px;border:1px solid var(--current)}
+.stream-container{text-align:center;display:inline-block;width:100%}
+#cam-stream,#track-stream{max-width:100%;border-radius:6px;border:1px solid var(--current);display:block;margin:0 auto}
+#track-canvas{max-width:100%}
 .form-group{margin-bottom:1rem}
 .form-group label{display:block;font-size:.82rem;color:var(--comment);margin-bottom:.35rem}
 .form-group select,.form-group input{width:100%;padding:.6rem .75rem;background:var(--bg);color:var(--fg);border:1px solid var(--current);border-radius:6px;font-size:.88rem;outline:none;transition:border .2s}
@@ -422,7 +427,27 @@ if (el) el.style.display='block';
 var tk='page_'+page;
 document.getElementById('page-title').textContent=_(tk);
 if (page==='camera'){var img=document.getElementById('cam-stream');if(img)img.src='/camera/stream?'+Date.now();}
+if (page==='tracking'){var img=document.getElementById('track-stream');if(img)img.src='/camera/stream?'+Date.now();loadDetections();}
 if (page==='settings'){wifiStatus();wifiScan();}
+}
+
+async function loadDetections(){
+try{
+var r=await fetch(API+'/detect');var d=await r.json();
+var canvas=document.getElementById('track-canvas');var img=document.getElementById('track-stream');
+if(!canvas||!img||!d.detections)return;
+var cw=img.clientWidth||640;var ch=img.clientHeight||480;
+canvas.width=cw;canvas.height=ch;
+var scaleX=cw/(img.naturalWidth||cw);var scaleY=ch/(img.naturalHeight||ch);
+var ctx=canvas.getContext('2d');ctx.clearRect(0,0,cw,ch);
+d.detections.forEach(function(det){
+var x=det.x*cw;var y=det.y*ch;var bw=det.w*cw;var bh=det.h*ch;
+ctx.strokeStyle='#50fa7b';ctx.lineWidth=3;ctx.strokeRect(x-bw/2,y-bh/2,bw,bh);
+ctx.fillStyle='rgba(80,250,123,0.15)';ctx.fillRect(x-bw/2,y-bh/2,bw,bh);
+ctx.strokeStyle='#50fa7b';ctx.font='bold 13px sans-serif';ctx.fillStyle='#50fa7b';
+ctx.fillText(det.label+' ('+(det.conf*100).toFixed(0)+'%)',x-bw/2+2,y-bh/2-4);
+});
+}catch(e){}
 }
 
 document.querySelectorAll('#sidebar nav a').forEach(function(a){
@@ -495,6 +520,8 @@ setTimeout(function(){window.location.reload();},3000);
 }
 
 setInterval(function(){
+var trackPage=document.getElementById('page-tracking');
+if(trackPage&&trackPage.style.display!=='none')loadDetections();
 fetch('/tracking').then(function(r){return r.json();}).then(function(d){
 var s=document.getElementById('track-status');
 var c=document.getElementById('track-correction');
