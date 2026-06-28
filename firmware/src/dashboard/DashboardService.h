@@ -34,6 +34,7 @@ private:
     void handleMotionCommand();
     void handleVisionInfo();
     void handleDetectionInfo();
+    void handleTrackingInfo();
     void handleApiInfo();
 
 public:

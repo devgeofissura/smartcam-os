@@ -18,6 +18,7 @@
  * Sprint 10: Camera × Motor integration — /motion API, web controls.
  * Sprint 11: Vision Engine — gray, HSV, threshold, blob detection.
  * Sprint 12: Detection Engine — color detector (first detector).
+ * Sprint 13: Tracking Engine — PID centering, motor follows target.
  */
 
 #include <Arduino.h>
@@ -133,7 +134,7 @@ void setup() {
     Serial.begin(115200);
     delay(100);
     Serial.println();
-    Serial.println(F("SmartCam OS v0.12.0 Sprint 12 - Detection Engine"));
+    Serial.println(F("SmartCam OS v0.13.0 Sprint 13 - Tracking Engine"));
     Serial.println(F("Platform: ESP32-S3 / T-SIMCAM v1.6"));
 
     g_systemState = SystemState::Init;
@@ -217,7 +218,19 @@ void setupVision()   {
         loggerService.warning("Vision", "Vision engine init failed");
     }
 }
-void setupTracking() { trackingEngine.begin(); }
+void setupTracking() {
+    trackingEngine.begin();
+    Detection initialTarget;
+    initialTarget.x = 0.5f;
+    initialTarget.y = 0.5f;
+    initialTarget.width = 0.1f;
+    initialTarget.height = 0.1f;
+    initialTarget.confidence = 0.0f;
+    initialTarget.classId = 0;
+    strcpy(initialTarget.label, "red");
+    trackingEngine.setTarget(initialTarget);
+    loggerService.info("Tracking", "Tracking engine started");
+}
 void setupAI()       {
     detectionEngine.begin();
 

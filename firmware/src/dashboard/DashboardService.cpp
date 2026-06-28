@@ -7,6 +7,7 @@
 #include "../core/vision/VisionEngine.h"
 #include "../core/ai/AIEngine.h"
 #include "../core/ai/ColorDetector.h"
+#include "../core/tracking/TrackingEngine.h"
 #include <WiFi.h>
 #include <esp_heap_caps.h>
 #include <esp_camera.h>
@@ -20,6 +21,7 @@ extern CameraEngine cameraEngine;
 extern MotionEngine motionEngine;
 extern VisionEngine visionEngine;
 extern DetectionEngine detectionEngine;
+extern TrackingEngine trackingEngine;
 
 // ============================================================
 // Embedded Web Files (PROGMEM)
@@ -291,6 +293,10 @@ static void handleDetectionInfoRoute() {
     if (s_instance) s_instance->handleDetectionInfo();
 }
 
+static void handleTrackingInfoRoute() {
+    if (s_instance) s_instance->handleTrackingInfo();
+}
+
 static void handleApiInfoRoute() {
     if (s_instance) s_instance->handleApiInfo();
 }
@@ -309,6 +315,7 @@ void DashboardService::registerRoutes() {
     apiServer.registerEndpoint("POST", "/motion", handleMotionCommandRoute);
     apiServer.registerEndpoint("GET", "/vision", handleVisionInfoRoute);
     apiServer.registerEndpoint("GET", "/detect", handleDetectionInfoRoute);
+    apiServer.registerEndpoint("GET", "/tracking", handleTrackingInfoRoute);
     apiServer.registerEndpoint("GET", "/api/info", handleApiInfoRoute);
 }
 
@@ -485,6 +492,21 @@ void DashboardService::handleDetectionInfo() {
     apiServer.sendJson(200, buf);
 }
 
+void DashboardService::handleTrackingInfo() {
+    char buf[512];
+    snprintf(buf, sizeof(buf),
+        "{\"status\":\"ok\",\"locked\":%s,\"correction\":%.4f,"
+        "\"tx\":%d,\"ty\":%d,\"tw\":%d,\"th\":%d,\"conf\":%.2f}",
+        trackingEngine.isTargetLocked() ? "true" : "false",
+        trackingEngine.getCorrectionAngle(),
+        trackingEngine.getTargetX(),
+        trackingEngine.getTargetY(),
+        trackingEngine.getTargetWidth(),
+        trackingEngine.getTargetHeight(),
+        trackingEngine.getTargetConfidence());
+    apiServer.sendJson(200, buf);
+}
+
 void DashboardService::handleCameraStream() {
     if (!cameraEngine.isInitialized()) {
         apiServer.sendError(503, "Camera not initialized");
@@ -527,7 +549,7 @@ void DashboardService::handleApiInfo() {
         "{\"status\":\"ok\",\"endpoints\":["
         "\"/\",\"/index.html\",\"/style.css\",\"/app.js\","
         "\"/system\",\"/network\",\"/logger\",\"/camera\","
-        "\"/camera/stream\",\"/motion\",\"/api/info\""
+        "\"/camera/stream\",\"/motion\",\"/vision\",\"/detect\",\"/tracking\",\"/api/info\""
         "]}");
 }
 
