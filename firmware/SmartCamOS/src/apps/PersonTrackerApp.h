@@ -3,11 +3,11 @@
 
 #include <Arduino.h>
 #include "../../sdk/interfaces/SmartCamApp.h"
-#include "../camera/CameraEngine.h"
-#include "../vision/VisionEngine.h"
-#include "../tracking/TrackingEngine.h"
-#include "../motion/MotionEngine.h"
-#include "../ai/AIEngine.h"
+#include "../core/camera/CameraEngine.h"
+#include "../core/vision/VisionEngine.h"
+#include "../core/tracking/TrackingEngine.h"
+#include "../core/motion/MotionEngine.h"
+#include "../core/ai/AIEngine.h"
 
 class PersonTrackerApp : public SmartCamApp {
 public:
