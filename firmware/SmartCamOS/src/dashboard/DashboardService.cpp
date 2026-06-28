@@ -467,14 +467,14 @@ void DashboardService::handleMotionCommand() {
         return;
     }
 
-    int axis = atoi(apiServer.getArg("axis"));
+    int axis = atoi(apiServer.getArg("axis").c_str());
 
     if (cmd == "enable") {
         bool on = apiServer.getArg("value") == "1";
         apiServer.sendJson(200, motionEngine.enableAxis(axis, on)
             ? "{\"status\":\"ok\"}" : "{\"status\":\"error\"}");
     } else if (cmd == "move") {
-        long steps = atol(apiServer.getArg("value"));
+        long steps = atol(apiServer.getArg("value").c_str());
         apiServer.sendJson(200, motionEngine.moveRelative(axis, steps)
             ? "{\"status\":\"ok\"}" : "{\"status\":\"error\"}");
     } else if (cmd == "stop") {
