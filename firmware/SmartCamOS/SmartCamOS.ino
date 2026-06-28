@@ -183,8 +183,9 @@ void setup() {
     setupBehavior();
     setupApp();
     delay(250);
-    Serial.println("[DIAG] Calling setupAPI/Dashboard...");
+    Serial.println("[DIAG] Calling setupAPI...");
     setupAPI();
+    Serial.println("[DIAG] Calling setupDashboard...");
     setupDashboard();
     delay(250);
 
