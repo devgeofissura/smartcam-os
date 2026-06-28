@@ -6,21 +6,21 @@
 #include "../../sdk/interfaces/IFrameProcessor.h"
 
 struct CameraPins {
-    int pwdn = 38;
-    int reset = 39;
-    int xclk = 11;
-    int siod = 5;
-    int sioc = 6;
-    int d7 = 12;
+    int pwdn = -1;
+    int reset = -1;
+    int xclk = 14;
+    int siod = 4;
+    int sioc = 5;
+    int d7 = 15;
     int d6 = 16;
-    int d5 = 18;
-    int d4 = 17;
-    int d3 = 15;
-    int d2 = 14;
-    int d1 = 10;
-    int d0 = 9;
-    int vsync = 47;
-    int href = 48;
+    int d5 = 17;
+    int d4 = 12;
+    int d3 = 10;
+    int d2 = 8;
+    int d1 = 9;
+    int d0 = 11;
+    int vsync = 6;
+    int href = 7;
     int pclk = 13;
 };
 

@@ -222,9 +222,9 @@ void setupCamera()   {
 void setupMotion()   {
     motionEngine.begin();
     AxisConfig panAxis;
-    panAxis.stepPin = 21;    // Grove SCL
-    panAxis.dirPin = 31;     // Grove SDA
-    panAxis.enablePin = 45;  // mPCIe TX (strapping, ok after boot)
+    panAxis.stepPin = 21;     // Grove SCL
+    panAxis.dirPin = 31;      // Grove SDA
+    panAxis.enablePin = -1;   // No enable pin (tie DM556D ENA+ to GND)
     panAxis.homePin = -1;
     panAxis.stepsPerDegree = 16.0f * 200.0f / 360.0f;
     panAxis.maxSpeed = 5000.0f;

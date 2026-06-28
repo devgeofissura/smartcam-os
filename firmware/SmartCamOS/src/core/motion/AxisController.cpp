@@ -36,14 +36,18 @@ bool AxisController::init(const AxisConfig& config) {
 
     pinMode(config.stepPin, OUTPUT);
     pinMode(config.dirPin, OUTPUT);
-    pinMode(config.enablePin, OUTPUT);
+    if (config.enablePin >= 0) {
+        pinMode(config.enablePin, OUTPUT);
+    }
     if (config.homePin >= 0) {
         pinMode(config.homePin, INPUT_PULLUP);
     }
 
     digitalWrite(config.stepPin, LOW);
     digitalWrite(config.dirPin, LOW);
-    digitalWrite(config.enablePin, HIGH); // disabled (active low)
+    if (config.enablePin >= 0) {
+        digitalWrite(config.enablePin, HIGH); // disabled (active low)
+    }
 
     m_currentSpeed = 0.0f;
     m_targetSpeed = config.maxSpeed;
@@ -116,7 +120,9 @@ bool AxisController::isBusy() const {
 
 bool AxisController::enable(bool on) {
     m_state.isEnabled = on;
-    digitalWrite(m_config.enablePin, on ? LOW : HIGH);
+    if (m_config.enablePin >= 0) {
+        digitalWrite(m_config.enablePin, on ? LOW : HIGH);
+    }
     if (on) {
         startTimerPeriodic();
     } else {
