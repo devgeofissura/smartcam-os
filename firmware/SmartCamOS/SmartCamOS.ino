@@ -225,8 +225,9 @@ void setupMotion()   {
     panAxis.acceleration = 1000.0f;
     panAxis.microSteps = 16;
     if (motionEngine.addAxis(panAxis)) {
-        motionEngine.enableAxis(0, true);
-        loggerService.info("Motion", "Pan axis initialized");
+        // DISABLED: step timer causes xQueueSemaphoreTake assert on S3
+        // motionEngine.enableAxis(0, true);
+        loggerService.info("Motion", "Pan axis initialized (timer DISABLED)");
     } else {
         loggerService.warning("Motion", "Pan axis init failed");
     }
