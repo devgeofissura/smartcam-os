@@ -21,8 +21,9 @@ NetworkService::~NetworkService() {
 
 bool NetworkService::init() {
     if (m_running) return true;
-    WiFi.mode(WIFI_OFF);
+    WiFi.mode(WIFI_STA);
     WiFi.setHostname(m_config.hostname);
+    WiFi.mode(WIFI_OFF);
     m_running = true;
     m_lastTick = millis();
     s_instance = this;
