@@ -20,6 +20,7 @@
  * Sprint 12: Detection Engine — color detector (first detector).
  * Sprint 13: Tracking Engine — PID centering, motor follows target.
  * Sprint 14: Person Detection — TFLite Micro person detector.
+ * Sprint 15: Person Tracker App — compose all engines into v1.0.
  */
 
 #include <Arduino.h>
@@ -61,6 +62,7 @@
 #include "src/core/ai/AIEngine.h"
 #include "src/core/ai/ColorDetector.h"
 #include "src/core/ai/PersonDetector.h"
+#include "src/apps/PersonTrackerApp.h"
 #include "src/core/BehaviorEngine.h"
 
 // ============================================================
@@ -84,6 +86,7 @@ TrackingEngine  trackingEngine;
 MotionEngine    motionEngine;
 DetectionEngine detectionEngine;
 BehaviorEngine  behaviorEngine;
+PersonTrackerApp personTracker;
 
 // Infrastructure Services
 NetworkService      networkService;
@@ -107,6 +110,7 @@ void setupVision();
 void setupTracking();
 void setupAI();
 void setupBehavior();
+void setupApp();
 void setupNetwork();
 void setupStorage();
 void setupLogger();
@@ -121,6 +125,7 @@ void loopVision();
 void loopTracking();
 void loopAI();
 void loopBehavior();
+void loopApp();
 void loopNetwork();
 void loopStorage();
 void loopLogger();
@@ -136,7 +141,7 @@ void setup() {
     Serial.begin(115200);
     delay(100);
     Serial.println();
-    Serial.println(F("SmartCam OS v0.14.0 Sprint 14 - Person Detection"));
+    Serial.println(F("SmartCam OS v1.0.0 Sprint 15 - Person Tracker App"));
     Serial.println(F("Platform: ESP32-S3 / T-SIMCAM v1.6"));
 
     g_systemState = SystemState::Init;
@@ -154,6 +159,7 @@ void setup() {
     setupTracking();
     setupAI();
     setupBehavior();
+    setupApp();
     setupAPI();
     setupDashboard();
 
@@ -177,6 +183,7 @@ void loop() {
     loopTracking();
     loopAI();
     loopBehavior();
+    loopApp();
     loopAPI();
     loopDashboard();
 }
@@ -261,6 +268,11 @@ void setupAI()       {
     }
 }
 void setupBehavior() { behaviorEngine.begin(); }
+void setupApp() {
+    personTracker.begin();
+    personTracker.startTrackingPerson();
+    loggerService.info("App", "PersonTracker v1.0 ready — tracking person");
+}
 void setupNetwork()  { networkService.init(); }
 void setupStorage()  { storageService.init(); }
 void setupLogger()   { loggerService.init(); }
@@ -275,6 +287,7 @@ void loopVision()   { visionEngine.update(); }
 void loopTracking() { trackingEngine.update(); }
 void loopAI()       { detectionEngine.update(); }
 void loopBehavior() { behaviorEngine.update(); }
+void loopApp()     { personTracker.update(); }
 void loopNetwork()  { networkService.tick(); }
 void loopStorage()  { storageService.tick(); }
 void loopLogger()   { loggerService.tick(); }

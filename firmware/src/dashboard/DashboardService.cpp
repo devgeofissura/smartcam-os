@@ -22,6 +22,7 @@ extern MotionEngine motionEngine;
 extern VisionEngine visionEngine;
 extern DetectionEngine detectionEngine;
 extern TrackingEngine trackingEngine;
+extern PersonTrackerApp personTracker;
 
 // ============================================================
 // Embedded Web Files (PROGMEM)
@@ -79,7 +80,29 @@ static const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <button onclick="sendMotion('enable',0,1)">Enable</button>
 <button onclick="sendMotion('enable',0,0)">Disable</button>
 </div></div></div>
-<div id="page-tracking" style="display:none"><div class="card"><h3>Target Tracking</h3><p>Coming soon.</p></div></div>
+<div id="page-tracking" style="display:none">
+  <div class="card"><h3>Object Tracking</h3>
+  <p>Target: <span id="track-target">person</span> &middot; Status: <span id="track-status">idle</span></p>
+  <p>Correction: <span id="track-correction">0.0000</span></p>
+  <p>Target: <span id="track-pos">(0, 0)</span> &middot; Size: <span id="track-size">0x0</span> &middot; Conf: <span id="track-conf">0.00</span></p>
+  <div class="button-row">
+    <button onclick="fetch('/tracking',{method:'POST',body:'action=track-person'}).then(r=>r.json()).then(d=>document.getElementById('track-status').textContent='tracking person')">Track Person</button>
+    <button onclick="fetch('/tracking',{method:'POST',body:'action=track-color&label=red'}).then(r=>r.json()).then(d=>document.getElementById('track-status').textContent='tracking red')">Track Red</button>
+    <button onclick="fetch('/tracking',{method:'POST',body:'action=stop'})" style="background:var(--danger)">Stop</button>
+  </div>
+  <script>
+  setInterval(function(){
+    fetch('/tracking').then(r=>r.json()).then(d=>{
+      document.getElementById('track-status').textContent=d.locked?'locked':'searching';
+      document.getElementById('track-correction').textContent=d.correction.toFixed(4);
+      document.getElementById('track-pos').textContent='('+d.tx+', '+d.ty+')';
+      document.getElementById('track-size').textContent=d.tw+'x'+d.th;
+      document.getElementById('track-conf').textContent=d.conf.toFixed(2);
+    });
+  },1000);
+  </script>
+  </div>
+</div>
 <div id="page-settings" style="display:none"><div class="card"><h3>Settings</h3><p>Coming soon.</p></div></div>
 </main>
 </div>
@@ -297,6 +320,10 @@ static void handleTrackingInfoRoute() {
     if (s_instance) s_instance->handleTrackingInfo();
 }
 
+static void handleTrackingCommandRoute() {
+    if (s_instance) s_instance->handleTrackingCommand();
+}
+
 static void handleApiInfoRoute() {
     if (s_instance) s_instance->handleApiInfo();
 }
@@ -316,6 +343,7 @@ void DashboardService::registerRoutes() {
     apiServer.registerEndpoint("GET", "/vision", handleVisionInfoRoute);
     apiServer.registerEndpoint("GET", "/detect", handleDetectionInfoRoute);
     apiServer.registerEndpoint("GET", "/tracking", handleTrackingInfoRoute);
+    apiServer.registerEndpoint("POST", "/tracking", handleTrackingCommandRoute);
     apiServer.registerEndpoint("GET", "/api/info", handleApiInfoRoute);
 }
 
@@ -507,6 +535,37 @@ void DashboardService::handleTrackingInfo() {
     apiServer.sendJson(200, buf);
 }
 
+void DashboardService::handleTrackingCommand() {
+    String action = apiServer.getArg("action");
+
+    if (action == "track-person") {
+        if (personTracker.startTrackingPerson()) {
+            apiServer.sendJson(200, "{\"status\":\"ok\",\"message\":\"Tracking person\"}");
+        } else {
+            apiServer.sendJson(400, "{\"status\":\"error\",\"message\":\"Person detector unavailable\"}");
+        }
+    } else if (action == "track-color") {
+        String colorLabel = apiServer.getArg("label");
+        if (colorLabel.length() > 0 && personTracker.startTrackingColor(colorLabel.c_str())) {
+            apiServer.sendJson(200, "{\"status\":\"ok\",\"message\":\"Tracking color\"}");
+        } else {
+            apiServer.sendJson(400, "{\"status\":\"error\",\"message\":\"Unknown color label\"}");
+        }
+    } else if (action == "stop") {
+        personTracker.stopTracking();
+        apiServer.sendJson(200, "{\"status\":\"ok\",\"message\":\"Tracking stopped\"}");
+    } else if (action == "set-detector") {
+        String name = apiServer.getArg("name");
+        if (name.length() > 0 && personTracker.setDetector(name.c_str())) {
+            apiServer.sendJson(200, "{\"status\":\"ok\",\"message\":\"Detector changed\"}");
+        } else {
+            apiServer.sendJson(400, "{\"status\":\"error\",\"message\":\"Unknown detector\"}");
+        }
+    } else {
+        apiServer.sendJson(400, "{\"status\":\"error\",\"message\":\"Unknown action\"}");
+    }
+}
+
 void DashboardService::handleCameraStream() {
     if (!cameraEngine.isInitialized()) {
         apiServer.sendError(503, "Camera not initialized");
@@ -549,7 +608,7 @@ void DashboardService::handleApiInfo() {
         "{\"status\":\"ok\",\"endpoints\":["
         "\"/\",\"/index.html\",\"/style.css\",\"/app.js\","
         "\"/system\",\"/network\",\"/logger\",\"/camera\","
-        "\"/camera/stream\",\"/motion\",\"/vision\",\"/detect\",\"/tracking\",\"/api/info\""
+        "\"/camera/stream\",\"/motion\",\"/vision\",\"/detect\",\"/tracking\",\"/tracking\"(POST),\"/api/info\""
         "]}");
 }
 
