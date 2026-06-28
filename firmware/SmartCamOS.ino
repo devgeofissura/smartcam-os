@@ -12,6 +12,7 @@
  * Sprint 4: Network Service — Wi-Fi STA/AP, captive portal, DNS.
  * Sprint 5: Dashboard Service — web interface served from PROGMEM.
  * Sprint 6: REST API — /network, /logger, /camera, /api/info endpoints.
+ * Sprint 7: Camera Engine — OV2640 init, capture, JPEG config.
  */
 
 #include <Arduino.h>
@@ -126,7 +127,7 @@ void setup() {
     Serial.begin(115200);
     delay(100);
     Serial.println();
-    Serial.println(F("SmartCam OS v0.6.0 Sprint 6 - REST API"));
+    Serial.println(F("SmartCam OS v0.7.0 Sprint 7 - Camera Engine"));
     Serial.println(F("Platform: ESP32-S3 / T-SIMCAM v1.6"));
 
     g_systemState = SystemState::Init;
@@ -176,7 +177,15 @@ void loop() {
 // ============================================================
 
 void setupCore()     { /* Core scheduler and state manager - Sprint 3 */ } — Sprint 2 */ }
-void setupCamera()   { cameraEngine.begin(); }
+void setupCamera()   {
+    cameraEngine.setPins(CameraPins());
+    if (cameraEngine.begin()) {
+        cameraEngine.startStream();
+        loggerService.info("Camera", "Camera initialized and streaming");
+    } else {
+        loggerService.warning("Camera", "Camera initialization failed");
+    }
+}
 void setupMotion()   { motionEngine.begin(); }
 void setupVision()   { visionEngine.begin(); }
 void setupTracking() { trackingEngine.begin(); }

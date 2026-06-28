@@ -2,6 +2,7 @@
 #include "../api/ApiServer.h"
 #include "../network/NetworkService.h"
 #include "../logger/LoggerService.h"
+#include "../core/camera/CameraEngine.h"
 #include <WiFi.h>
 #include <esp_heap_caps.h>
 
@@ -10,6 +11,7 @@ static DashboardService* s_instance = nullptr;
 extern ApiServer apiServer;
 extern NetworkService networkService;
 extern LoggerService loggerService;
+extern CameraEngine cameraEngine;
 
 // ============================================================
 // Embedded Web Files (PROGMEM)
@@ -286,8 +288,25 @@ void DashboardService::handleLogger() {
 }
 
 void DashboardService::handleCameraInfo() {
-    apiServer.sendJson(200,
-        "{\"status\":\"unavailable\",\"fps\":0,\"resolution\":\"-\"}");
+    char buf[256];
+    if (cameraEngine.isInitialized()) {
+        const CameraFrame* frame = cameraEngine.getCurrentFrame();
+        snprintf(buf, sizeof(buf),
+            "{"
+            "\"status\":\"ok\","
+            "\"fps\":%d,"
+            "\"resolution\":\"%dx%d\","
+            "\"streaming\":%s"
+            "}",
+            cameraEngine.getFps(),
+            frame ? frame->width : 0,
+            frame ? frame->height : 0,
+            cameraEngine.isStreaming() ? "true" : "false");
+    } else {
+        snprintf(buf, sizeof(buf),
+            "{\"status\":\"unavailable\",\"fps\":0,\"resolution\":\"-\"}");
+    }
+    apiServer.sendJson(200, buf);
 }
 
 void DashboardService::handleApiInfo() {
