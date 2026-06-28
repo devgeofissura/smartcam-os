@@ -5,8 +5,6 @@
 #include "../../sdk/interfaces/SmartCamModule.h"
 #include "../../sdk/interfaces/IFrameProcessor.h"
 
-struct camera_fb_t;
-
 struct CameraPins {
     int pwdn = -1;
     int reset = -1;
@@ -70,7 +68,7 @@ private:
     unsigned long m_fpsTimer;
     IFrameProcessor* m_processors[4];
     int m_processorCount;
-    camera_fb_t* m_currentFb;
+    void* m_currentFb;
 
     void resetFrame();
     void updateFps();

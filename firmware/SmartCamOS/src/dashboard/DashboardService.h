@@ -18,9 +18,6 @@ public:
 
     const char* name() const override { return "DashboardService"; }
 
-private:
-    bool m_running;
-
     void registerRoutes();
     void handleRoot();
     void handleCss();
@@ -37,6 +34,9 @@ private:
     void handleTrackingInfo();
     void handleTrackingCommand();
     void handleApiInfo();
+
+private:
+    bool m_running;
 
 public:
     DashboardService();

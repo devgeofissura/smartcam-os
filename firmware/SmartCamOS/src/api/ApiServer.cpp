@@ -140,9 +140,9 @@ bool ApiServer::endStream() {
     return true;
 }
 
-const char* ApiServer::getArg(const char* name) const {
-    if (!s_webServer || !name) return nullptr;
-    return s_webServer->arg(name).c_str();
+String ApiServer::getArg(const char* name) const {
+    if (!s_webServer || !name) return String();
+    return s_webServer->arg(name);
 }
 
 bool ApiServer::hasArg(const char* name) const {

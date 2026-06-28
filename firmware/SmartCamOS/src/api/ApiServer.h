@@ -30,7 +30,7 @@ public:
     bool endStream();
 
     // HTTP request helpers
-    const char* getArg(const char* name) const;
+    String getArg(const char* name) const;
     bool hasArg(const char* name) const;
 
 private:

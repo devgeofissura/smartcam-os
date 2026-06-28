@@ -86,7 +86,7 @@ void CameraEngine::update() {
     if (!m_streaming || !m_initialized) return;
 
     if (m_currentFb) {
-        esp_camera_fb_return(m_currentFb);
+        esp_camera_fb_return((camera_fb_t*)m_currentFb);
         m_currentFb = nullptr;
     }
 
@@ -114,7 +114,7 @@ void CameraEngine::update() {
 bool CameraEngine::stop() {
     m_streaming = false;
     if (m_currentFb) {
-        esp_camera_fb_return(m_currentFb);
+        esp_camera_fb_return((camera_fb_t*)m_currentFb);
         m_currentFb = nullptr;
     }
     if (m_initialized) {

@@ -8,6 +8,8 @@
 #include "../core/ai/AIEngine.h"
 #include "../core/ai/ColorDetector.h"
 #include "../core/tracking/TrackingEngine.h"
+#include "../apps/PersonTrackerApp.h"
+#include <esp_camera.h>
 #include <WiFi.h>
 #include <esp_heap_caps.h>
 #include <esp_camera.h>
@@ -418,7 +420,7 @@ void DashboardService::handleLogger() {
 void DashboardService::handleCameraInfo() {
     char buf[256];
     if (cameraEngine.isInitialized()) {
-        const CameraFrame* frame = cameraEngine.getCurrentFrame();
+        const Frame* frame = cameraEngine.getCurrentFrame();
         snprintf(buf, sizeof(buf),
             "{"
             "\"status\":\"ok\","
@@ -459,26 +461,26 @@ void DashboardService::handleMotionInfo() {
 }
 
 void DashboardService::handleMotionCommand() {
-    const char* cmd = apiServer.getArg("cmd");
-    if (!cmd) {
+    String cmd = apiServer.getArg("cmd");
+    if (cmd.length() == 0) {
         apiServer.sendError(400, "Missing cmd parameter");
         return;
     }
 
     int axis = atoi(apiServer.getArg("axis"));
 
-    if (strcmp(cmd, "enable") == 0) {
-        bool on = strcmp(apiServer.getArg("value"), "1") == 0;
+    if (cmd == "enable") {
+        bool on = apiServer.getArg("value") == "1";
         apiServer.sendJson(200, motionEngine.enableAxis(axis, on)
             ? "{\"status\":\"ok\"}" : "{\"status\":\"error\"}");
-    } else if (strcmp(cmd, "move") == 0) {
+    } else if (cmd == "move") {
         long steps = atol(apiServer.getArg("value"));
         apiServer.sendJson(200, motionEngine.moveRelative(axis, steps)
             ? "{\"status\":\"ok\"}" : "{\"status\":\"error\"}");
-    } else if (strcmp(cmd, "stop") == 0) {
+    } else if (cmd == "stop") {
         apiServer.sendJson(200, motionEngine.stopAxis(axis)
             ? "{\"status\":\"ok\"}" : "{\"status\":\"error\"}");
-    } else if (strcmp(cmd, "home") == 0) {
+    } else if (cmd == "home") {
         apiServer.sendJson(200, motionEngine.homeAxis(axis)
             ? "{\"status\":\"ok\"}" : "{\"status\":\"error\"}");
     } else {
@@ -615,7 +617,7 @@ void DashboardService::handleApiInfo() {
 void DashboardService::handleSystemInfo() {
     char buf[512];
     uint32_t freeHeap = ESP.getFreeHeap();
-    uint32_t freePsram = ESP.getPsramSize() - ESP.getPsramFree();
+    uint32_t freePsram = ESP.getPsramSize() - ESP.getFreePsram();
     uint32_t totalPsram = ESP.getPsramSize();
 
     snprintf(buf, sizeof(buf),
@@ -637,7 +639,7 @@ void DashboardService::handleSystemInfo() {
         freePsram,
         totalPsram,
         ESP.getSketchSize(),
-        ESP.getFreeSketch());
+        0);
 
     apiServer.sendJson(200, buf);
 }
