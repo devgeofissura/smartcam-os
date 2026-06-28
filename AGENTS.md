@@ -6,7 +6,7 @@
 
 # WiFi Config Flow
 1. Boot → try saved credentials from Preferences (NVS)
-2. If fail/no creds → AP mode + captive portal (SSID: `SmartCamOS`, IP: `192.168.4.1`)
+2. If fail/no creds → AP mode + captive portal (SSID: `GeoFissura`, password: `Tenta&70`, IP: `192.168.4.1`)
 3. User connects to AP, opens Settings page, scans networks, enters password, saves
 4. Save writes to Preferences via `POST /api/wifi/config` → `ESP.restart()`
 5. On reboot, tries saved STA credentials

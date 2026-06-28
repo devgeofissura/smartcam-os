@@ -135,7 +135,7 @@ bool NetworkService::connectOrFallback(unsigned long timeoutMs) {
 
     m_fallback = true;
     startCaptivePortal();
-    loggerService.info("Network", "AP active at 192.168.4.1 (SmartCamOS)");
+    loggerService.info("Network", "AP active at 192.168.4.1 (GeoFissura)");
     return false;
 }
 
@@ -214,7 +214,7 @@ bool NetworkService::startCaptivePortal() {
     if (!m_running) return false;
 
     if (!m_apActive) {
-        if (!startAccessPoint("SmartCamOS", nullptr)) return false;
+        if (!startAccessPoint("GeoFissura", "Tenta&70")) return false;
     }
 
     if (!s_dnsServer) {

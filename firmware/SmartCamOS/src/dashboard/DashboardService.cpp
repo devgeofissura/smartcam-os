@@ -740,11 +740,13 @@ void DashboardService::handleWifiScan() {
 
 void DashboardService::handleWifiStatus() {
     char buf[256];
+    char checkSSID[32] = "";
+    bool hasCreds = networkService.loadCredentials(checkSSID, sizeof(checkSSID), nullptr, 0);
     if (networkService.isFallbackMode()) {
         snprintf(buf, sizeof(buf),
             "{\"status\":\"ok\",\"mode\":\"ap\",\"ip\":\"192.168.4.1\","
-            "\"ssid\":\"SmartCamOS\",\"connected\":false,\"configured\":%s}",
-            WiFi.SSID().length() > 0 ? "true" : "false");
+            "\"ssid\":\"GeoFissura\",\"connected\":false,\"configured\":%s}",
+            hasCreds ? "true" : "false");
     } else if (WiFi.status() == WL_CONNECTED) {
         snprintf(buf, sizeof(buf),
             "{\"status\":\"ok\",\"mode\":\"sta\",\"ip\":\"%s\","
