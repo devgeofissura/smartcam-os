@@ -192,7 +192,7 @@ void loop() {
 // Stub Implementations (replaced as each Sprint implements the real module) — interfaces only)
 // ============================================================
 
-void setupCore()     { /* Core scheduler and state manager - Sprint 3 */ } — Sprint 2 */ }
+void setupCore()     { /* Core scheduler and state manager - Sprint 3 */ }
 void setupCamera()   {
     cameraEngine.setPins(CameraPins());
     if (cameraEngine.begin()) {
