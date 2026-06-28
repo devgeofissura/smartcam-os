@@ -24,11 +24,11 @@ static camera_config_t buildEspConfig(const CameraPins& pins, const CameraConfig
     c.pin_pwdn = pins.pwdn;
     c.pin_reset = pins.reset;
     c.xclk_freq_hz = config.xclkFreq;
-    c.pixel_format = PIXFORMAT_GRAYSCALE;
+    c.pixel_format = PIXFORMAT_JPEG;
     c.frame_size = (framesize_t)config.frameSize;
     c.jpeg_quality = config.jpegQuality;
-    c.fb_count = 1;
-    c.grab_mode = CAMERA_GRAB_LATEST;
+    c.fb_count = config.fbCount;
+    c.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
     c.fb_location = CAMERA_FB_IN_PSRAM;
     return c;
 }
@@ -60,6 +60,8 @@ void CameraEngine::resetFrame() {
 
 bool CameraEngine::begin() {
     if (m_initialized) return true;
+
+    esp_camera_set_psram_mode(true);
 
     camera_config_t espConfig = buildEspConfig(m_pins, m_config);
 
@@ -98,13 +100,7 @@ void CameraEngine::update() {
     m_frame.size = fb->len;
     m_frame.width = fb->width;
     m_frame.height = fb->height;
-    if (fb->format == PIXFORMAT_JPEG) {
-        m_frame.bytesPerPixel = 0;
-    } else if (fb->format == PIXFORMAT_GRAYSCALE) {
-        m_frame.bytesPerPixel = 1;
-    } else {
-        m_frame.bytesPerPixel = 2;
-    }
+    m_frame.bytesPerPixel = (fb->format == PIXFORMAT_JPEG) ? 0 : 2;
     m_frame.timestamp = millis();
 
     for (int i = 0; i < m_processorCount; i++) {
@@ -181,13 +177,7 @@ bool CameraEngine::captureFrame() {
     m_frame.size = fb->len;
     m_frame.width = fb->width;
     m_frame.height = fb->height;
-    if (fb->format == PIXFORMAT_JPEG) {
-        m_frame.bytesPerPixel = 0;
-    } else if (fb->format == PIXFORMAT_GRAYSCALE) {
-        m_frame.bytesPerPixel = 1;
-    } else {
-        m_frame.bytesPerPixel = 2;
-    }
+    m_frame.bytesPerPixel = (fb->format == PIXFORMAT_JPEG) ? 0 : 2;
     m_frame.timestamp = millis();
 
     return true;
