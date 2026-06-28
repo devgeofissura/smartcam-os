@@ -81,6 +81,16 @@ bool CameraEngine::begin() {
 
     m_initialized = true;
     s_instance = this;
+
+    // Test: capture one frame immediately after init
+    camera_fb_t* fb = esp_camera_fb_get();
+    if (fb) {
+        ESP_LOGI("Camera", "Frame queue OK - captured %d bytes", fb->len);
+        esp_camera_fb_return(fb);
+    } else {
+        ESP_LOGW("Camera", "Frame queue NULL after init!");
+    }
+
     return true;
 }
 
@@ -211,7 +221,16 @@ bool CameraEngine::removeProcessor(IFrameProcessor* processor) {
                 m_processors[j] = m_processors[j + 1];
             }
             m_processorCount--;
-            return true;
+    // Test: capture one frame immediately after init
+    camera_fb_t* fb = esp_camera_fb_get();
+    if (fb) {
+        Serial.printf("[Camera] Frame queue OK - captured %d bytes\r\n", fb->len);
+        esp_camera_fb_return(fb);
+    } else {
+        Serial.println("[Camera] Frame queue NULL after init!\r");
+    }
+
+    return true;
         }
     }
     return false;
