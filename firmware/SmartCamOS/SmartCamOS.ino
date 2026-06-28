@@ -194,13 +194,13 @@ void loop() {
     loopConfig();
     loopCore();
     loopNetwork();
-    // loopCamera();    // DISABLED - isolating xQueueSemaphoreTake assert
+    loopCamera();
     loopVision();
     loopMotion();
     loopTracking();
     loopAI();
     loopBehavior();
-    // loopApp();       // DISABLED - depends on camera
+    loopApp();
     loopAPI();
     loopDashboard();
 }
@@ -222,7 +222,7 @@ void setupCamera()   {
 void setupMotion()   {
     motionEngine.begin();
     AxisConfig panAxis;
-    panAxis.stepPin = 46;
+    panAxis.stepPin = 2;   // TEMP: was 46 - testing if GPIO46 causes TG1WDT
     panAxis.dirPin = 45;
     panAxis.enablePin = 31;
     panAxis.homePin = -1;
