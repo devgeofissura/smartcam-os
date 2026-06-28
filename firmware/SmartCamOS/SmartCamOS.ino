@@ -169,7 +169,7 @@ void setup() {
     setupCamera();
     setupVision();
     delay(250);
-    // setupMotion();   // DISABLED - isolating TG1WDT crash
+    setupMotion();
     delay(250);
     setupTracking();
     setupAI();
@@ -194,13 +194,13 @@ void loop() {
     loopConfig();
     loopCore();
     loopNetwork();
-    loopCamera();
+    // loopCamera();    // DISABLED - isolating xQueueSemaphoreTake assert
     loopVision();
     loopMotion();
     loopTracking();
     loopAI();
     loopBehavior();
-    loopApp();
+    // loopApp();       // DISABLED - depends on camera
     loopAPI();
     loopDashboard();
 }
