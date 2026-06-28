@@ -157,39 +157,29 @@ void setup() {
 
     g_systemState = SystemState::Init;
 
-    Serial.println("[DIAG] Calling setupLogger...");
     setupLogger();
     loggerService.info("System", "Logger service ready");
     delay(250);
 
-    Serial.println("[DIAG] Calling setupStorage/Config/Core...");
     setupStorage();
     setupConfig();
     setupCore();
     delay(250);
-    Serial.println("[DIAG] Calling setupNetwork...");
     setupNetwork();
-    Serial.println("[DIAG] Calling setupCamera...");
     setupCamera();
-    Serial.println("[DIAG] Calling setupVision...");
     setupVision();
     delay(250);
-    Serial.println("[DIAG] Calling setupMotion...");
     setupMotion();
     delay(250);
-    Serial.println("[DIAG] Calling setupTracking/AI/Behavior/App...");
     setupTracking();
     setupAI();
     setupBehavior();
     setupApp();
     delay(250);
-    Serial.println("[DIAG] Calling setupAPI...");
     setupAPI();
-    Serial.println("[DIAG] Calling setupDashboard...");
     setupDashboard();
     delay(250);
 
-    Serial.println("[DIAG] Setup complete!");
     g_systemState = SystemState::Ready;
     loggerService.info("System", "SmartCam OS ready — all systems initialized");
 }
@@ -221,7 +211,12 @@ void loop() {
 
 void setupCore()     { /* Core scheduler and state manager - Sprint 3 */ }
 void setupCamera()   {
-    loggerService.info("Camera", "Camera init DISABLED — isolating S3 crash");
+    cameraEngine.setPins(CameraPins());
+    if (cameraEngine.begin()) {
+        loggerService.info("Camera", "Camera initialized (GRAYSCALE+PSRAM, fb=1, LATEST)");
+    } else {
+        loggerService.warning("Camera", "Camera init failed — check pinout or power");
+    }
 }
 void setupMotion()   {
     motionEngine.begin();
@@ -235,9 +230,8 @@ void setupMotion()   {
     panAxis.acceleration = 1000.0f;
     panAxis.microSteps = 16;
     if (motionEngine.addAxis(panAxis)) {
-        // DISABLED: step timer causes xQueueSemaphoreTake assert on S3
-        // motionEngine.enableAxis(0, true);
-        loggerService.info("Motion", "Pan axis initialized (timer DISABLED)");
+        motionEngine.enableAxis(0, true);
+        loggerService.info("Motion", "Pan axis initialized");
     } else {
         loggerService.warning("Motion", "Pan axis init failed");
     }
@@ -272,30 +266,28 @@ void setupAI()       {
     redConfig.minBlobArea = 100;
     redConfig.label = "red";
 
-    // DISABLED: heap_caps_malloc(SPIRAM) triggers xQueueSemaphoreTake assert on S3 rev0.2
-    // ColorDetector* redDetector = new ColorDetector(redConfig);
-    // if (redDetector && detectionEngine.registerDetector("red", redDetector)) {
-    //     detectionEngine.setActiveDetector("red");
-    //     loggerService.info("AI", "Red color detector registered");
-    // } else {
-    //     delete redDetector;
-    //     loggerService.warning("AI", "Red color detector registration failed");
-    // }
+    ColorDetector* redDetector = new ColorDetector(redConfig);
+    if (redDetector && detectionEngine.registerDetector("red", redDetector)) {
+        detectionEngine.setActiveDetector("red");
+        loggerService.info("AI", "Red color detector registered");
+    } else {
+        delete redDetector;
+        loggerService.warning("AI", "Red color detector registration failed");
+    }
 
-    // PersonDetector* personDetector = new PersonDetector();
-    // if (personDetector && detectionEngine.registerDetector("person", personDetector)) {
-    //     loggerService.info("AI", "Person detector registered");
-    // } else {
-    //     delete personDetector;
-    //     loggerService.warning("AI", "Person detector registration failed");
-    // }
+    PersonDetector* personDetector = new PersonDetector();
+    if (personDetector && detectionEngine.registerDetector("person", personDetector)) {
+        loggerService.info("AI", "Person detector registered");
+    } else {
+        delete personDetector;
+        loggerService.warning("AI", "Person detector registration failed");
+    }
 }
 void setupBehavior() { behaviorEngine.begin(); }
 void setupApp() {
     personTracker.begin();
-    // DISABLED: triggers heap_caps_malloc(SPIRAM) -> xQueueSemaphoreTake assert
-    // personTracker.startTrackingPerson();
-    loggerService.info("App", "PersonTracker v1.0 ready (detectors DISABLED)");
+    personTracker.startTrackingPerson();
+    loggerService.info("App", "PersonTracker v1.0 ready — tracking person");
 }
 void setupNetwork()  { networkService.init(); }
 void setupStorage()  { storageService.init(); }
