@@ -298,21 +298,11 @@ void setupConfig()   { configManager.init(); }
 void setupDashboard(){ dashboardService.init(); }
 
 void loopCore()     { delay(5); }
-void loopCamera()   {
-    // Skip: camera frame queue is NULL on ESP32-S3 (driver bug in Arduino 3.3.10)
-}
-void loopVision()   {
-    // Skip: depends on camera frames
-}
-void loopTracking() {
-    // Skip: depends on vision frames
-}
-void loopAI()       {
-    // Skip: depends on camera frames
-}
-void loopApp()     {
-    // Skip: depends on tracking/vision frames
-}
+void loopCamera()   { cameraEngine.update(); }
+void loopVision()   { visionEngine.update(); }
+void loopTracking() { trackingEngine.update(); }
+void loopAI()       { detectionEngine.update(); }
+void loopApp()     { personTracker.update(); }
 void loopMotion()   { motionEngine.update(); }
 void loopVision()   { visionEngine.update(); }
 void loopTracking() { trackingEngine.update(); }

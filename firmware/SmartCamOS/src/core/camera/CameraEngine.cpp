@@ -27,8 +27,8 @@ static camera_config_t buildEspConfig(const CameraPins& pins, const CameraConfig
     c.pixel_format = PIXFORMAT_GRAYSCALE;
     c.frame_size = (framesize_t)config.frameSize;
     c.jpeg_quality = config.jpegQuality;
-    c.fb_count = config.fbCount;
-    c.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
+    c.fb_count = 1;
+    c.grab_mode = CAMERA_GRAB_LATEST;
     c.fb_location = CAMERA_FB_IN_PSRAM;
     return c;
 }
