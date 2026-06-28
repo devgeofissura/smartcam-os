@@ -10,3 +10,8 @@
 3. User connects to AP, opens Settings page, scans networks, enters password, saves
 4. Save writes to Preferences via `POST /api/wifi/config` → `ESP.restart()`
 5. On reboot, tries saved STA credentials
+
+# Known Issues
+- WebServer must be restarted after WiFi mode switch (STA→AP) because socket bound
+  to STA interface becomes orphaned. Handled in `SmartCamOS.ino` after
+  `connectOrFallback()` — stops and restarts `apiServer` + re-registers routes.

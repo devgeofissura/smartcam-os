@@ -182,6 +182,12 @@ void setup() {
 
     networkService.connectOrFallback();
 
+    if (networkService.isFallbackMode()) {
+        apiServer.stop();
+        apiServer.start(80);
+        dashboardService.registerRoutes();
+    }
+
     g_systemState = SystemState::Ready;
     loggerService.info("System", "SmartCam OS ready — all systems initialized");
 }
