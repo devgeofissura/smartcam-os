@@ -20,6 +20,20 @@ public:
     bool sendError(int code, const char* message);
 
     const char* name() const override { return "ApiServer"; }
+
+    // System info API (called by dashboard)
+    void registerSystemEndpoints();
+
+private:
+    int m_port;
+    bool m_running;
+    void* m_server; // WebServer*
+
+    bool serveStaticFile(const char* path, const uint8_t* data, size_t len, const char* mime);
+
+public:
+    ApiServer();
+    ~ApiServer();
 };
 
 #endif

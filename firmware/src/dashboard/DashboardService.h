@@ -17,6 +17,19 @@ public:
     bool broadcastEvent(const char* eventType, const char* jsonData);
 
     const char* name() const override { return "DashboardService"; }
+
+private:
+    bool m_running;
+
+    void registerRoutes();
+    void handleRoot();
+    void handleCss();
+    void handleJs();
+    void handleSystemInfo();
+
+public:
+    DashboardService();
+    ~DashboardService();
 };
 
 #endif
