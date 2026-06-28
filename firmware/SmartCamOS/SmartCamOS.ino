@@ -147,28 +147,35 @@ void setup() {
     pinMode(1, OUTPUT);
     digitalWrite(1, HIGH);
 
+    disableCore0WDT();
+    disableCore1WDT();
+
     g_systemState = SystemState::Init;
 
     setupLogger();
     loggerService.info("System", "Logger service ready");
-    delay(10);
+    delay(50);
 
     setupStorage();
     setupConfig();
     setupCore();
-    delay(10);
+    delay(50);
     setupNetwork();
     setupCamera();
     setupVision();
     setupMotion();
-    delay(10);
+    delay(50);
     setupTracking();
     setupAI();
     setupBehavior();
     setupApp();
-    delay(10);
+    delay(50);
     setupAPI();
     setupDashboard();
+    delay(50);
+
+    enableCore0WDT();
+    enableCore1WDT();
 
     g_systemState = SystemState::Ready;
     loggerService.info("System", "SmartCam OS ready — all systems initialized");

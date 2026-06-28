@@ -1,15 +1,27 @@
 #include "StorageService.h"
+#include "../logger/LoggerService.h"
 #include <LittleFS.h>
+#include <esp_partition.h>
 #include <string.h>
+
+extern LoggerService loggerService;
 
 StorageService::StorageService() {}
 StorageService::~StorageService() { deinit(); }
 
 bool StorageService::init() {
-    if (!LittleFS.begin(false, "/littlefs", 5, "fatfs")) {
+    const esp_partition_t* partition = esp_partition_find_first(
+        ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr);
+    if (!partition) {
+        loggerService.warning("Storage", "No SPIFFS partition found — continuing without filesystem");
+        return true;
+    }
+
+    if (!LittleFS.begin(false, "/littlefs", 5, partition->label)) {
         delay(100);
-        if (!LittleFS.begin(true, "/littlefs", 5, "fatfs")) {
-            return false;
+        if (!LittleFS.begin(true, "/littlefs", 5, partition->label)) {
+            loggerService.warning("Storage", "LittleFS mount failed — continuing without filesystem");
+            return true;
         }
     }
     return true;
