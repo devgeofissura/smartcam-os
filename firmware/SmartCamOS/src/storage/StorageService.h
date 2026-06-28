@@ -27,6 +27,9 @@ public:
     bool removeDir(const char* path);
 
     const char* name() const override { return "StorageService"; }
+
+    StorageService();
+    ~StorageService();
 };
 
 #endif

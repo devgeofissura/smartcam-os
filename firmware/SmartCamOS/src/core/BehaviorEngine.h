@@ -20,6 +20,9 @@ public:
     int getActiveApps(SmartCamApp** out, int maxCount) const;
 
     const char* name() const override { return "BehaviorEngine"; }
+
+    BehaviorEngine();
+    ~BehaviorEngine();
 };
 
 #endif
