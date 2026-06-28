@@ -1,6 +1,10 @@
 #include "ConfigManager.h"
+#include "../logger/LoggerService.h"
 #include <LittleFS.h>
 #include <ArduinoJson.h>
+#include <esp_partition.h>
+
+extern LoggerService loggerService;
 
 static ConfigManager* s_instance = nullptr;
 
@@ -23,19 +27,19 @@ bool ConfigManager::init() {
     m_running = true;
     s_instance = this;
 
-    if (!LittleFS.begin()) {
-        m_running = false;
-        return false;
+    const esp_partition_t* partition = esp_partition_find_first(
+        ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr);
+    if (partition && LittleFS.begin(false, "/littlefs", 5, partition->label)) {
+        if (!LittleFS.exists("/config")) {
+            LittleFS.mkdir("/config");
+        }
+        if (!LittleFS.exists(PROFILES_DIR)) {
+            LittleFS.mkdir(PROFILES_DIR);
+        }
+        load();
+    } else {
+        loggerService.warning("Config", "No filesystem — running without persistent config");
     }
-
-    if (!LittleFS.exists("/config")) {
-        LittleFS.mkdir("/config");
-    }
-    if (!LittleFS.exists(PROFILES_DIR)) {
-        LittleFS.mkdir(PROFILES_DIR);
-    }
-
-    load();
     return true;
 }
 
