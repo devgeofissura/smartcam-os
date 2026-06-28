@@ -32,99 +32,131 @@ extern PersonTrackerApp personTracker;
 
 static const char INDEX_HTML[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SmartCam Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>GeoFissura</title>
 <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <div id="app">
-<header>
-<h1>SmartCam Dashboard</h1>
-<div id="connection-status" class="disconnected">Connecting...</div>
-</header>
-<nav id="main-nav">
-<a href="#" data-page="dashboard" class="active">Dashboard</a>
-<a href="#" data-page="camera">Camera</a>
-<a href="#" data-page="motion">Motion</a>
-<a href="#" data-page="tracking">Tracking</a>
-<a href="#" data-page="settings">Settings</a>
-</nav>
-<main id="content">
-<div id="page-dashboard">
-<div class="grid">
-<div class="card"><h3>System</h3><div id="sys-info"><p>Loading...</p></div></div>
-<div class="card"><h3>Memory</h3><div id="mem-info"><p>Loading...</p></div></div>
-<div class="card"><h3>Network</h3><div id="net-info"><p>Loading...</p></div></div>
-<div class="card"><h3>Camera</h3><div id="cam-info"><p>No camera data</p></div></div>
-</div>
-</div>
-<div id="page-camera" style="display:none">
-<div class="card">
-<h3>Live Stream</h3>
-<img id="cam-stream" src="" style="width:100%;max-width:640px;border-radius:4px">
-</div>
-</div>
-<div id="page-motion" style="display:none">
-<div class="card"><h3>Axis Control</h3>
-<p>Position: <span id="mot-pos">0</span></p>
-<p>Speed: <span id="mot-speed">0</span></p>
-<p>Homed: <span id="mot-homed">-</span></p>
-<p>Moving: <span id="mot-moving">-</span></p>
-<p>Enabled: <span id="mot-enabled">-</span></p>
-<div style="margin-top:1rem">
-<button onclick="sendMotion('home',0)">Home</button>
-<button onclick="sendMotion('move',0,100)">+100</button>
-<button onclick="sendMotion('move',0,-100)">-100</button>
-<button onclick="sendMotion('stop',0)">Stop</button>
-<button onclick="sendMotion('enable',0,1)">Enable</button>
-<button onclick="sendMotion('enable',0,0)">Disable</button>
-</div></div></div>
-<div id="page-tracking" style="display:none">
-  <div class="card"><h3>Object Tracking</h3>
-  <p>Target: <span id="track-target">person</span> &middot; Status: <span id="track-status">idle</span></p>
-  <p>Correction: <span id="track-correction">0.0000</span></p>
-  <p>Target: <span id="track-pos">(0, 0)</span> &middot; Size: <span id="track-size">0x0</span> &middot; Conf: <span id="track-conf">0.00</span></p>
-  <div class="button-row">
-    <button onclick="fetch('/tracking',{method:'POST',body:'action=track-person'}).then(r=>r.json()).then(d=>document.getElementById('track-status').textContent='tracking person')">Track Person</button>
-    <button onclick="fetch('/tracking',{method:'POST',body:'action=track-color&label=red'}).then(r=>r.json()).then(d=>document.getElementById('track-status').textContent='tracking red')">Track Red</button>
-    <button onclick="fetch('/tracking',{method:'POST',body:'action=stop'})" style="background:var(--danger)">Stop</button>
-  </div>
-  <script>
-  setInterval(function(){
-    fetch('/tracking').then(r=>r.json()).then(d=>{
-      document.getElementById('track-status').textContent=d.locked?'locked':'searching';
-      document.getElementById('track-correction').textContent=d.correction.toFixed(4);
-      document.getElementById('track-pos').textContent='('+d.tx+', '+d.ty+')';
-      document.getElementById('track-size').textContent=d.tw+'x'+d.th;
-      document.getElementById('track-conf').textContent=d.conf.toFixed(2);
-    });
-  },1000);
-  </script>
-  </div>
-</div>
-<div id="page-settings" style="display:none">
-  <div class="card"><h3>WiFi Configuration</h3>
-    <p>Status: <span id="wifi-status">Loading...</span></p>
-    <div style="margin-top:1rem">
-      <label>Select Network:</label>
-      <select id="wifi-networks" style="width:100%;padding:.5rem;margin:.25rem 0 1rem;background:#16213e;color:#e0e0e0;border:1px solid #333;border-radius:4px">
-        <option value="">-- Scan for networks --</option>
-      </select>
-      <label>Password:</label>
-      <input type="password" id="wifi-password" placeholder="WPA2 password (leave blank for open)" style="width:100%;padding:.5rem;margin:.25rem 0 1rem;background:#16213e;color:#e0e0e0;border:1px solid #333;border-radius:4px">
-      <button id="wifi-scan-btn" onclick="wifiScan()" style="margin-right:.5rem">Scan</button>
-      <button id="wifi-connect-btn" onclick="wifiConnect()" style="background:var(--success)">Save &amp; Reboot</button>
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">&#9670;</div>
+      <h2>GeoFissura</h2>
     </div>
-    <div id="wifi-msg" style="margin-top:.5rem;font-size:.9rem"></div>
-  </div>
-  <div class="card"><h3>System</h3>
-    <button onclick="fetch('/api/wifi/status').then(r=>r.json()).then(d=>document.getElementById('wifi-status').textContent=d.mode+' ('+d.ip+')')" style="margin-right:.5rem">Refresh Status</button>
-  </div>
-</div>
-</main>
+    <nav>
+      <a href="#" data-page="dashboard" class="active">
+        <span class="nav-icon">&#9632;</span> Dashboard
+      </a>
+      <a href="#" data-page="camera">
+        <span class="nav-icon">&#9678;</span> Camera
+      </a>
+      <a href="#" data-page="motion">
+        <span class="nav-icon">&#9650;</span> Motion
+      </a>
+      <a href="#" data-page="tracking">
+        <span class="nav-icon">&#9673;</span> Tracking
+      </a>
+      <a href="#" data-page="settings">
+        <span class="nav-icon">&#9881;</span> Settings
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <span id="connection-status" class="disconnected">&#9679; Offline</span>
+    </div>
+  </aside>
+  <main id="content">
+    <header class="page-header">
+      <h1 id="page-title">Dashboard</h1>
+    </header>
+    <div id="page-dashboard">
+      <div class="grid">
+        <div class="card"><div class="card-header"><span class="card-icon">&#9881;</span><h3>System</h3></div><div id="sys-info" class="card-body"><p>Loading...</p></div></div>
+        <div class="card"><div class="card-header"><span class="card-icon">&#9783;</span><h3>Memory</h3></div><div id="mem-info" class="card-body"><p>Loading...</p></div></div>
+        <div class="card"><div class="card-header"><span class="card-icon">&#9730;</span><h3>Network</h3></div><div id="net-info" class="card-body"><p>Loading...</p></div></div>
+        <div class="card"><div class="card-header"><span class="card-icon">&#128247;</span><h3>Camera</h3></div><div id="cam-info" class="card-body"><p>No camera data</p></div></div>
+      </div>
+    </div>
+    <div id="page-camera" style="display:none">
+      <div class="card">
+        <div class="card-header"><span class="card-icon">&#128247;</span><h3>Live Stream</h3></div>
+        <div class="card-body stream-container">
+          <img id="cam-stream" src="" alt="Camera Stream">
+        </div>
+      </div>
+    </div>
+    <div id="page-motion" style="display:none">
+      <div class="card">
+        <div class="card-header"><span class="card-icon">&#9650;</span><h3>Axis Control</h3></div>
+        <div class="card-body">
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">Position</span><span class="info-value" id="mot-pos">0</span></div>
+            <div class="info-item"><span class="info-label">Speed</span><span class="info-value" id="mot-speed">0</span></div>
+            <div class="info-item"><span class="info-label">Homed</span><span class="info-value" id="mot-homed">-</span></div>
+            <div class="info-item"><span class="info-label">Moving</span><span class="info-value" id="mot-moving">-</span></div>
+            <div class="info-item"><span class="info-label">Enabled</span><span class="info-value" id="mot-enabled">-</span></div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="sendMotion('home',0)">Home</button>
+            <button class="btn btn-secondary" onclick="sendMotion('move',0,100)">+100</button>
+            <button class="btn btn-secondary" onclick="sendMotion('move',0,-100)">-100</button>
+            <button class="btn btn-danger" onclick="sendMotion('stop',0)">Stop</button>
+            <button class="btn btn-success" onclick="sendMotion('enable',0,1)">Enable</button>
+            <button class="btn btn-warning" onclick="sendMotion('enable',0,0)">Disable</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="page-tracking" style="display:none">
+      <div class="card">
+        <div class="card-header"><span class="card-icon">&#9673;</span><h3>Object Tracking</h3></div>
+        <div class="card-body">
+          <div class="info-grid">
+            <div class="info-item"><span class="info-label">Target</span><span class="info-value" id="track-target">person</span></div>
+            <div class="info-item"><span class="info-label">Status</span><span class="info-value" id="track-status">idle</span></div>
+            <div class="info-item"><span class="info-label">Correction</span><span class="info-value" id="track-correction">0.0000</span></div>
+            <div class="info-item"><span class="info-label">Position</span><span class="info-value" id="track-pos">(0, 0)</span></div>
+            <div class="info-item"><span class="info-label">Size</span><span class="info-value" id="track-size">0x0</span></div>
+            <div class="info-item"><span class="info-label">Confidence</span><span class="info-value" id="track-conf">0.00</span></div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" onclick="trackAction('track-person')">Track Person</button>
+            <button class="btn btn-secondary" onclick="trackAction('track-color','red')">Track Red</button>
+            <button class="btn btn-danger" onclick="trackAction('stop')">Stop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="page-settings" style="display:none">
+      <div class="card">
+        <div class="card-header"><span class="card-icon">&#9730;</span><h3>WiFi Configuration</h3></div>
+        <div class="card-body">
+          <div class="wifi-status-bar">
+            <span>Status:</span>
+            <span id="wifi-status">Loading...</span>
+            <button class="btn btn-sm" onclick="wifiStatus()">Refresh</button>
+          </div>
+          <div class="form-group">
+            <label for="wifi-networks">Network</label>
+            <select id="wifi-networks">
+              <option value="">-- Select a network --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="wifi-password">Password</label>
+            <input type="password" id="wifi-password" placeholder="Leave blank for open networks">
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-primary" id="wifi-scan-btn" onclick="wifiScan()">Scan</button>
+            <button class="btn btn-success" id="wifi-connect-btn" onclick="wifiConnect()">Save &amp; Reboot</button>
+          </div>
+          <div id="wifi-msg" class="msg"></div>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 <script src="/app.js"></script>
 </body>
@@ -132,35 +164,106 @@ static const char INDEX_HTML[] PROGMEM = R"rawliteral(
 )rawliteral";
 
 static const char STYLE_CSS[] PROGMEM = R"rawliteral(
+:root {
+  --bg: #282a36;
+  --bg-alt: #1e1f29;
+  --current: #44475a;
+  --selection: #44475a;
+  --fg: #f8f8f2;
+  --comment: #6272a4;
+  --cyan: #8be9fd;
+  --green: #50fa7b;
+  --orange: #ffb86c;
+  --pink: #ff79c6;
+  --purple: #bd93f9;
+  --red: #ff5555;
+  --yellow: #f1fa8c;
+  --radius: 10px;
+  --shadow: 0 4px 12px rgba(0,0,0,.3);
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#1a1a2e;color:#e0e0e0;line-height:1.6}
-header{background:#16213e;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #e94560}
-#connection-status{padding:.25rem .75rem;border-radius:4px;font-size:.875rem}
-#connection-status.connected{background:#4caf50}
-#connection-status.disconnected{background:#f44336}
-#connection-status.connecting{background:#ff9800}
-#main-nav{background:#16213e;padding:.5rem 2rem;display:flex;gap:1rem}
-#main-nav a{color:#a0a0a0;text-decoration:none;padding:.5rem 1rem;border-radius:4px;transition:background .2s,color .2s}
-#main-nav a:hover,#main-nav a.active{background:#0f3460;color:#e0e0e0}
-#content{flex:1;padding:2rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem}
-.card{background:#0f3460;border-radius:8px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.card h3{margin-bottom:1rem;color:#e94560;font-size:1.1rem}
-.card p{margin:.5rem 0;font-size:.95rem}
-.card .label{color:#a0a0a0}
-.card .value{float:right;font-weight:600}
-table{width:100%;border-collapse:collapse}
-td{padding:.4rem 0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,sans-serif;background:var(--bg);color:var(--fg);line-height:1.5;overflow-x:hidden}
+#app{display:flex;min-height:100vh}
+#sidebar{width:220px;background:var(--bg-alt);display:flex;flex-direction:column;flex-shrink:0;border-right:1px solid var(--current)}
+.sidebar-header{padding:1.25rem;display:flex;align-items:center;gap:.75rem;border-bottom:1px solid var(--current)}
+.sidebar-header .logo{font-size:1.5rem;color:var(--pink)}
+.sidebar-header h2{font-size:1.1rem;font-weight:700;color:var(--purple);letter-spacing:.5px}
+#sidebar nav{flex:1;padding:.5rem}
+#sidebar nav a{display:flex;align-items:center;gap:.75rem;padding:.7rem .75rem;margin-bottom:.2rem;border-radius:var(--radius);color:var(--comment);text-decoration:none;font-size:.9rem;transition:all .2s}
+#sidebar nav a:hover{background:var(--current);color:var(--fg)}
+#sidebar nav a.active{background:var(--purple);color:var(--bg);font-weight:600}
+.nav-icon{font-size:.85rem;width:1.2rem;text-align:center}
+.sidebar-footer{padding:1rem;border-top:1px solid var(--current);font-size:.8rem}
+#connection-status{display:flex;align-items:center;gap:.4rem}
+#connection-status.connected{color:var(--green)}
+#connection-status.disconnected{color:var(--red)}
+#connection-status.connecting{color:var(--yellow)}
+#content{flex:1;display:flex;flex-direction:column;overflow-y:auto}
+.page-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--current);background:var(--bg-alt)}
+.page-header h1{font-size:1.25rem;font-weight:600;color:var(--pink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;padding:1.5rem}
+.card{background:var(--bg-alt);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--current)}
+.card-header{display:flex;align-items:center;gap:.6rem;padding:1rem 1.25rem;border-bottom:1px solid var(--current);background:rgba(68,71,90,.2)}
+.card-icon{font-size:1rem;color:var(--purple)}
+.card-header h3{font-size:.95rem;font-weight:600;color:var(--cyan)}
+.card-body{padding:1.25rem}
+.card-body p{margin:.35rem 0;font-size:.88rem;color:var(--comment)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1rem;margin-bottom:1rem}
+.info-item{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid rgba(68,71,90,.3)}
+.info-label{font-size:.82rem;color:var(--comment)}
+.info-value{font-size:.88rem;color:var(--fg);font-weight:600;font-variant-numeric:tabular-nums}
+.btn-group{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem}
+.btn{padding:.5rem 1rem;border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;color:var(--bg)}
+.btn:active{transform:scale(.96)}
+.btn-primary{background:var(--purple)}
+.btn-primary:hover{background:#a57ef5}
+.btn-secondary{background:var(--current);color:var(--fg)}
+.btn-secondary:hover{background:#5a5d77}
+.btn-success{background:var(--green);color:var(--bg)}
+.btn-success:hover{background:#3ce46a}
+.btn-danger{background:var(--red)}
+.btn-danger:hover{background:#e64444}
+.btn-warning{background:var(--yellow);color:var(--bg)}
+.btn-warning:hover{background:#e6e47c}
+.btn-sm{padding:.3rem .6rem;font-size:.75rem;background:var(--current);color:var(--fg)}
+.btn-sm:hover{background:var(--comment)}
+.stream-container{text-align:center}
+#cam-stream{max-width:100%;border-radius:6px;border:1px solid var(--current)}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.82rem;color:var(--comment);margin-bottom:.35rem}
+.form-group select,.form-group input{width:100%;padding:.6rem .75rem;background:var(--bg);color:var(--fg);border:1px solid var(--current);border-radius:6px;font-size:.88rem;outline:none;transition:border .2s}
+.form-group select:focus,.form-group input:focus{border-color:var(--purple)}
+.form-group select option{background:var(--bg);color:var(--fg)}
+.wifi-status-bar{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;padding:.5rem .75rem;background:var(--bg);border-radius:6px;font-size:.85rem}
+.wifi-status-bar span:first-child{color:var(--comment)}
+.msg{margin-top:.75rem;padding:.5rem;border-radius:6px;font-size:.82rem;color:var(--fg);background:var(--current);display:none}
+.msg.show{display:block}
+@media(max-width:768px){
+#sidebar{width:56px;overflow:hidden}
+.sidebar-header h2,#sidebar nav a span:not(.nav-icon),.sidebar-footer span{display:none}
+#sidebar nav a{justify-content:center;padding:.7rem 0}
+#sidebar nav a .nav-icon{font-size:1.1rem;width:auto}
+.sidebar-header{padding:.75rem;justify-content:center}
+.sidebar-header .logo{font-size:1.3rem}
+.info-grid{grid-template-columns:1fr}
+.grid{padding:1rem}
+.page-header{padding:1rem}
+}
 )rawliteral";
 
 static const char APP_JS[] PROGMEM = R"rawliteral(
 const API = window.location.origin;
 let ws = null;
+const pageNames = {dashboard:'Dashboard',camera:'Camera',motion:'Motion',tracking:'Tracking',settings:'Settings'};
 
-function updateStatus(connected) {
-const el = document.getElementById('connection-status');
-if (connected) { el.textContent='Connected'; el.className='connected'; }
-else { el.textContent='Disconnected'; el.className='disconnected'; }
+function msg(text,type) {
+const el = document.getElementById('wifi-msg');
+if (!el) return;
+el.textContent = text;
+el.className = 'msg show';
+if (type==='error') el.style.color='var(--red)';
+else el.style.color='var(--fg)';
 }
 
 async function loadSystemInfo() {
@@ -168,19 +271,28 @@ try {
 const r = await fetch(API + '/system');
 const d = await r.json();
 document.getElementById('sys-info').innerHTML =
-'<table><tr><td>Uptime</td><td class="value">'+d.uptime+'s</td></tr>'+
-'<tr><td>CPU Freq</td><td class="value">'+d.cpuFreq+' MHz</td></tr>'+
-'<tr><td>Sketch Size</td><td class="value">'+d.sketchSize+' bytes</td></tr>'+
-'<tr><td>Free Sketch</td><td class="value">'+d.freeSketch+' bytes</td></tr></table>';
+'<div class="info-grid"><div class="info-item"><span class="info-label">Uptime</span><span class="info-value">'+d.uptime+'s</span></div>'+
+'<div class="info-item"><span class="info-label">CPU</span><span class="info-value">'+d.cpuFreq+' MHz</span></div>'+
+'<div class="info-item"><span class="info-label">Sketch</span><span class="info-value">'+d.sketchSize+' B</span></div>'+
+'<div class="info-item"><span class="info-label">Free Sketch</span><span class="info-value">'+d.freeSketch+' B</span></div></div>';
 document.getElementById('mem-info').innerHTML =
-'<table><tr><td>Free Heap</td><td class="value">'+d.freeHeap+' bytes</td></tr>'+
-'<tr><td>Min Heap</td><td class="value">'+d.minHeap+' bytes</td></tr>'+
-'<tr><td>Free PSRAM</td><td class="value">'+d.freePsram+' bytes</td></tr>'+
-'<tr><td>Total PSRAM</td><td class="value">'+d.totalPsram+' bytes</td></tr></table>';
+'<div class="info-grid"><div class="info-item"><span class="info-label">Free Heap</span><span class="info-value">'+formatBytes(d.freeHeap)+'</span></div>'+
+'<div class="info-item"><span class="info-label">Min Heap</span><span class="info-value">'+formatBytes(d.minHeap)+'</span></div>'+
+'<div class="info-item"><span class="info-label">Free PSRAM</span><span class="info-value">'+formatBytes(d.freePsram)+'</span></div>'+
+'<div class="info-item"><span class="info-label">Total PSRAM</span><span class="info-value">'+formatBytes(d.totalPsram)+'</span></div></div>';
 } catch(e) {
-document.getElementById('sys-info').innerHTML='<p>Error loading system info</p>';
-document.getElementById('mem-info').innerHTML='<p>Error loading memory info</p>';
+document.getElementById('sys-info').innerHTML='<p>Error loading data</p>';
+document.getElementById('mem-info').innerHTML='<p>Error loading data</p>';
 }
+}
+
+function formatBytes(b) {
+if (!b||b===0) return '0 B';
+const units = ['B','KB','MB'];
+let i = 0;
+let v = b;
+while (v>=1024 && i<units.length-1) { v/=1024; i++; }
+return v.toFixed(1)+' '+units[i];
 }
 
 async function loadNetworkInfo() {
@@ -188,10 +300,10 @@ try {
 const r = await fetch(API + '/network');
 const d = await r.json();
 document.getElementById('net-info').innerHTML =
-'<table><tr><td>IP</td><td class="value">'+d.ip+'</td></tr>'+
-'<tr><td>SSID</td><td class="value">'+d.ssid+'</td></tr>'+
-'<tr><td>RSSI</td><td class="value">'+d.rssi+' dBm</td></tr>'+
-'<tr><td>MAC</td><td class="value">'+d.mac+'</td></tr></table>';
+'<div class="info-grid"><div class="info-item"><span class="info-label">IP</span><span class="info-value">'+d.ip+'</span></div>'+
+'<div class="info-item"><span class="info-label">SSID</span><span class="info-value">'+d.ssid+'</span></div>'+
+'<div class="info-item"><span class="info-label">Signal</span><span class="info-value">'+d.rssi+' dBm</span></div>'+
+'<div class="info-item"><span class="info-label">MAC</span><span class="info-value">'+d.mac+'</span></div></div>';
 updateStatus(true);
 } catch(e) {
 document.getElementById('net-info').innerHTML='<p>Not connected</p>';
@@ -204,33 +316,30 @@ try {
 const r = await fetch(API + '/camera');
 const d = await r.json();
 document.getElementById('cam-info').innerHTML =
-'<table><tr><td>Status</td><td class="value">'+d.status+'</td></tr>'+
-'<tr><td>FPS</td><td class="value">'+d.fps+'</td></tr>'+
-'<tr><td>Resolution</td><td class="value">'+d.resolution+'</td></tr></table>'+
-'<p><a href="/camera/stream" target="_blank">Open Stream</a></p>';
+'<div class="info-grid"><div class="info-item"><span class="info-label">Status</span><span class="info-value">'+d.status+'</span></div>'+
+'<div class="info-item"><span class="info-label">FPS</span><span class="info-value">'+d.fps+'</span></div>'+
+'<div class="info-item"><span class="info-label">Resolution</span><span class="info-value">'+d.resolution+'</span></div></div>'+
+'<div class="btn-group"><a class="btn btn-primary" href="/camera/stream" target="_blank">Open Stream</a></div>';
 } catch(e) {
 document.getElementById('cam-info').innerHTML='<p>Camera not available</p>';
 }
 }
 
 function navigate(page) {
-document.querySelectorAll('#main-nav a').forEach(l=>l.classList.remove('active'));
-document.querySelector('#main-nav a[data-page="'+page+'"]').classList.add('active');
-document.querySelectorAll('#content > div').forEach(d=>d.style.display='none');
+document.querySelectorAll('#sidebar nav a').forEach(function(l){l.classList.remove('active');});
+const link = document.querySelector('#sidebar nav a[data-page="'+page+'"]');
+if (link) link.classList.add('active');
+document.querySelectorAll('#content > div[id^="page-"]').forEach(function(d){d.style.display='none';});
 const el = document.getElementById('page-'+page);
 if (el) el.style.display='block';
-if (page==='camera') document.getElementById('cam-stream').src='/camera/stream';
-if (page==='settings') { wifiScan(); wifiStatus(); }
+document.getElementById('page-title').textContent = pageNames[page]||page;
+if (page==='camera') {
+const img = document.getElementById('cam-stream');
+if (img) img.src = '/camera/stream?'+Date.now();
 }
-
-async function wifiStatus() {
-try {
-const r = await fetch('/api/wifi/status');
-const d = await r.json();
-document.getElementById('wifi-status').textContent = d.mode + ' (' + d.ip + (d.ssid ? ', ' + d.ssid : '') + ')';
-} catch(e) {}
+if (page==='settings') { wifiStatus(); wifiScan(); }
 }
-document.querySelectorAll('#main-nav a').forEach(function(a){
+document.querySelectorAll('#sidebar nav a').forEach(function(a){
 a.addEventListener('click',function(e){
 e.preventDefault(); navigate(this.dataset.page);
 });
@@ -258,10 +367,28 @@ loadMotionInfo();
 } catch(e) { console.error(e); }
 }
 
+async function trackAction(action, label) {
+let body = 'action='+action;
+if (label) body += '&label='+label;
+try {
+const r = await fetch(API + '/tracking', {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+const d = await r.json();
+if (d.status==='ok') msg(action + ' started');
+} catch(e) { console.error(e); }
+}
+
+async function wifiStatus() {
+try {
+const r = await fetch('/api/wifi/status');
+const d = await r.json();
+document.getElementById('wifi-status').textContent = d.mode + ' (' + d.ip + (d.ssid ? ', ' + d.ssid : '') + ')';
+} catch(e) {}
+}
+
 async function wifiScan() {
 const btn = document.getElementById('wifi-scan-btn');
+if (!btn) return;
 btn.textContent='Scanning...'; btn.disabled=true;
-document.getElementById('wifi-msg').textContent='';
 try {
 const r = await fetch('/api/wifi/scan');
 const d = await r.json();
@@ -271,14 +398,14 @@ if (d.networks && d.networks.length>0) {
 d.networks.forEach(function(n){
 const opt = document.createElement('option');
 opt.value = n.ssid;
-opt.textContent = n.ssid + ' (' + n.rssi + ' dBm)' + (n.open ? ' [open]' : '');
+opt.textContent = n.ssid + ' (' + (n.rssi<-70?'&#9785;':n.rssi<-50?'&#9786;':'&#9787;') + ' ' + n.rssi + ' dBm)' + (n.open ? ' [open]' : '');
 sel.appendChild(opt);
 });
-document.getElementById('wifi-msg').textContent = d.networks.length + ' networks found';
+msg(d.networks.length + ' networks found');
 } else {
-document.getElementById('wifi-msg').textContent = 'No networks found';
+msg('No networks found','error');
 }} catch(e) {
-document.getElementById('wifi-msg').textContent = 'Scan failed';
+msg('Scan failed','error');
 }
 btn.textContent='Scan'; btn.disabled=false;
 }
@@ -286,18 +413,40 @@ btn.textContent='Scan'; btn.disabled=false;
 async function wifiConnect() {
 const ssid = document.getElementById('wifi-networks').value;
 const pw = document.getElementById('wifi-password').value;
-if (!ssid) { document.getElementById('wifi-msg').textContent='Select a network'; return; }
-document.getElementById('wifi-msg').textContent='Saving and rebooting...';
+if (!ssid) { msg('Select a network','error'); return; }
+msg('Saving and rebooting...');
 try {
 const body = 'ssid='+encodeURIComponent(ssid)+'&password='+encodeURIComponent(pw);
 await fetch('/api/wifi/config', {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
-} catch(e) { document.getElementById('wifi-msg').textContent='Config saved, rebooting...'; }
+} catch(e) { msg('Config saved, rebooting...'); }
 setTimeout(function(){ window.location.reload(); }, 3000);
 }
 
+setInterval(function(){
+fetch('/tracking').then(function(r){return r.json();}).then(function(d){
+const s = document.getElementById('track-status');
+const c = document.getElementById('track-correction');
+const p = document.getElementById('track-pos');
+const sz = document.getElementById('track-size');
+const cf = document.getElementById('track-conf');
+if (s) s.textContent = d.locked ? 'locked' : 'searching';
+if (c) c.textContent = d.correction.toFixed(4);
+if (p) p.textContent = '('+d.tx+', '+d.ty+')';
+if (sz) sz.textContent = d.tw+'x'+d.th;
+if (cf) cf.textContent = d.conf.toFixed(2);
+}).catch(function(){});
+},1000);
+
+function updateStatus(connected) {
+const el = document.getElementById('connection-status');
+if (!el) return;
+if (connected) { el.innerHTML='&#9679; Online'; el.className='connected'; }
+else { el.innerHTML='&#9679; Offline'; el.className='disconnected'; }
+}
+
 function refresh() { loadSystemInfo(); loadNetworkInfo(); loadCameraInfo(); loadMotionInfo(); }
-setInterval(refresh, 3000);
-document.addEventListener('DOMContentLoaded', refresh);
+setInterval(refresh, 5000);
+document.addEventListener('DOMContentLoaded', function(){ navigate('dashboard'); });
 )rawliteral";
 
 // ============================================================
