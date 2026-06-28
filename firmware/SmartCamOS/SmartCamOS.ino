@@ -221,21 +221,7 @@ void setupCamera()   {
 }
 void setupMotion()   {
     motionEngine.begin();
-    AxisConfig panAxis;
-    panAxis.stepPin = 21;      // Grove SCL (mPCIe_LED, safe)
-    panAxis.dirPin = 48;       // mPCIe_PWR (lateral connector, safe)
-    panAxis.enablePin = -1;    // No enable pin (tie DM556D ENA+ to GND)
-    panAxis.homePin = -1;
-    panAxis.stepsPerDegree = 16.0f * 200.0f / 360.0f;
-    panAxis.maxSpeed = 5000.0f;
-    panAxis.acceleration = 1000.0f;
-    panAxis.microSteps = 16;
-    if (motionEngine.addAxis(panAxis)) {
-        motionEngine.enableAxis(0, true);
-        loggerService.info("Motion", "Pan axis initialized");
-    } else {
-        loggerService.warning("Motion", "Pan axis init failed");
-    }
+    loggerService.info("Motion", "Motion engine started (no axis, testing camera)");
 }
 void setupVision()   {
     if (visionEngine.begin()) {
