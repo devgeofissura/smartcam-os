@@ -151,18 +151,22 @@ void setup() {
 
     setupLogger();
     loggerService.info("System", "Logger service ready");
+    delay(10);
 
     setupStorage();
     setupConfig();
     setupCore();
+    delay(10);
     setupNetwork();
     setupCamera();
     setupVision();
     setupMotion();
+    delay(10);
     setupTracking();
     setupAI();
     setupBehavior();
     setupApp();
+    delay(10);
     setupAPI();
     setupDashboard();
 

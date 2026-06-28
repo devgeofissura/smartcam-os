@@ -6,8 +6,9 @@ StorageService::StorageService() {}
 StorageService::~StorageService() { deinit(); }
 
 bool StorageService::init() {
-    if (!LittleFS.begin(false)) {
-        if (!LittleFS.begin(true)) {
+    if (!LittleFS.begin(false, "/littlefs", 5, "fatfs")) {
+        delay(100);
+        if (!LittleFS.begin(true, "/littlefs", 5, "fatfs")) {
             return false;
         }
     }
