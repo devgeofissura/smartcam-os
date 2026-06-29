@@ -152,52 +152,77 @@ bool PersonDetector::runInference(uint8_t* frame, int width, int height, size_t 
         m_resultCount = 1;
     }
 #else
-    int rgbSize = width * height * 3;
-    uint8_t* rgbBuf = (uint8_t*)heap_caps_malloc(rgbSize, MALLOC_CAP_SPIRAM);
-    if (!rgbBuf) {
-        rgbBuf = (uint8_t*)malloc(rgbSize);
-    }
-    if (!rgbBuf) return true;
-
     size_t srcLen = size ? size : (width * height * 2);
-    if (!fmt2rgb888(frame, srcLen, PIXFORMAT_JPEG, rgbBuf)) {
+
+    int step = 1;
+    while ((width / step) * (height / step) > 320 * 240) {
+        step++;
+    }
+
+    int fullSize = width * height * 3;
+    uint8_t* rgbBuf = (uint8_t*)heap_caps_malloc(fullSize, MALLOC_CAP_SPIRAM);
+    if (!rgbBuf) {
+        rgbBuf = (uint8_t*)malloc(fullSize);
+    }
+
+    bool decoded = false;
+    if (rgbBuf) {
+        decoded = fmt2rgb888(frame, srcLen, PIXFORMAT_JPEG, rgbBuf);
+    }
+
+    if (decoded) {
+        int sampleCount = 0;
+        unsigned long long sum = 0;
+        for (int y = 0; y < height; y += step) {
+            for (int x = 0; x < width; x += step) {
+                int idx = (y * width + x) * 3;
+                sum += (rgbBuf[idx] * 77 + rgbBuf[idx + 1] * 150 + rgbBuf[idx + 2] * 29) >> 8;
+                sampleCount++;
+            }
+        }
+        int mean = (int)(sum / sampleCount);
+
+        int above = 0;
+        for (int y = 0; y < height; y += step) {
+            for (int x = 0; x < width; x += step) {
+                int idx = (y * width + x) * 3;
+                int gray = (rgbBuf[idx] * 77 + rgbBuf[idx + 1] * 150 + rgbBuf[idx + 2] * 29) >> 8;
+                if (gray > mean + 20 || gray < mean - 20) above++;
+            }
+        }
+
         free(rgbBuf);
-        return true;
-    }
 
-    int pixels = width * height;
-    int sum = 0;
-    for (int i = 0; i < pixels; i++) {
-        uint8_t r = rgbBuf[i * 3];
-        uint8_t g = rgbBuf[i * 3 + 1];
-        uint8_t b = rgbBuf[i * 3 + 2];
-        sum += (r * 77 + g * 150 + b * 29) >> 8;
-    }
-    int mean = sum / pixels;
-
-    int above = 0;
-    for (int i = 0; i < pixels; i++) {
-        uint8_t r = rgbBuf[i * 3];
-        uint8_t g = rgbBuf[i * 3 + 1];
-        uint8_t b = rgbBuf[i * 3 + 2];
-        int gray = (r * 77 + g * 150 + b * 29) >> 8;
-        if (gray > mean + 20 || gray < mean - 20) above++;
-    }
-
-    free(rgbBuf);
-
-    float contentRatio = (float)above / pixels;
-    if (contentRatio > 0.05f) {
-        Detection& d = m_results[0];
-        d.x = 0.5f;
-        d.y = 0.5f;
-        d.width = 1.0f;
-        d.height = 1.0f;
-        d.confidence = contentRatio > 1.0f ? 1.0f : contentRatio;
-        d.classId = 1;
-        strncpy(d.label, m_config.label, sizeof(d.label) - 1);
-        d.label[sizeof(d.label) - 1] = '\0';
-        m_resultCount = 1;
+        float contentRatio = (float)above / sampleCount;
+        if (contentRatio > 0.10f) {
+            Detection& d = m_results[0];
+            d.x = 0.5f;
+            d.y = 0.5f;
+            d.width = 1.0f;
+            d.height = 1.0f;
+            d.confidence = contentRatio > 1.0f ? 1.0f : contentRatio;
+            d.classId = 1;
+            strncpy(d.label, m_config.label, sizeof(d.label) - 1);
+            d.label[sizeof(d.label) - 1] = '\0';
+            m_resultCount = 1;
+        }
+    } else {
+        if (rgbBuf) free(rgbBuf);
+        if (srcLen > 25000) {
+            Detection& d = m_results[0];
+            d.x = 0.5f;
+            d.y = 0.5f;
+            d.width = 1.0f;
+            d.height = 1.0f;
+            float confidence = (srcLen - 25000) / 75000.0f;
+            if (confidence < 0.2f) confidence = 0.2f;
+            if (confidence > 0.8f) confidence = 0.8f;
+            d.confidence = confidence;
+            d.classId = 1;
+            strncpy(d.label, m_config.label, sizeof(d.label) - 1);
+            d.label[sizeof(d.label) - 1] = '\0';
+            m_resultCount = 1;
+        }
     }
 #endif
 
