@@ -27,6 +27,7 @@ public:
     void handleLogger();
     void handleCameraInfo();
     void handleCameraStream();
+    void handleCameraFrame();
     void handleMotionInfo();
     void handleMotionCommand();
     void handleVisionInfo();

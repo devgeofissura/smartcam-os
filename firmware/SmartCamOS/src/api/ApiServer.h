@@ -16,6 +16,7 @@ public:
     bool registerEndpoint(const char* method, const char* path, void (*handler)());
     bool unregisterEndpoint(const char* method, const char* path);
     bool sendResponse(int code, const char* contentType, const char* body);
+    bool sendData(int code, const char* contentType, const char* data, size_t len);
     bool sendJson(int code, const char* json);
     bool sendError(int code, const char* message);
 

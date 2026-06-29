@@ -417,6 +417,8 @@ document.getElementById('cam-info').innerHTML='<p>'+_('no_camera')+'</p>';
 }
 }
 
+var _trackFrameInterval=null;
+
 function navigate(page){
 document.querySelectorAll('#sidebar nav a').forEach(function(l){l.classList.remove('active');});
 var link=document.querySelector('#sidebar nav a[data-page="'+page+'"]');
@@ -424,13 +426,14 @@ if (link) link.classList.add('active');
 document.querySelectorAll('#content > div[id^="page-"]').forEach(function(d){d.style.display='none';});
 var cs=document.getElementById('cam-stream');if(cs)cs.src='';
 var ts=document.getElementById('track-stream');if(ts)ts.src='';
+if(_trackFrameInterval){clearInterval(_trackFrameInterval);_trackFrameInterval=null;}
 var el=document.getElementById('page-'+page);
 if (el) el.style.display='block';
 var tk='page_'+page;
 document.getElementById('page-title').textContent=_(tk);
-if (page==='camera'){setTimeout(function(){var img=document.getElementById('cam-stream');if(img)img.src='/camera/stream?'+Date.now();},100);}
-if (page==='tracking'){setTimeout(function(){var img=document.getElementById('track-stream');if(img)img.src='/camera/stream?'+Date.now();loadDetections();},100);}
-if (page==='settings'){wifiStatus();wifiScan();}
+if(page==='camera'){setTimeout(function(){var img=document.getElementById('cam-stream');if(img)img.src='/camera/stream?'+Date.now();},100);}
+if(page==='tracking'){setTimeout(function(){var img=document.getElementById('track-stream');if(img)img.src='/camera/frame?'+Date.now();loadDetections();},100);_trackFrameInterval=setInterval(function(){var img=document.getElementById('track-stream');if(img)img.src='/camera/frame?'+Date.now();},1000);}
+if(page==='settings'){wifiStatus();wifiScan();}
 }
 
 async function loadDetections(){
@@ -623,6 +626,10 @@ static void handleCameraStreamRoute() {
     if (s_instance) s_instance->handleCameraStream();
 }
 
+static void handleCameraFrameRoute() {
+    if (s_instance) s_instance->handleCameraFrame();
+}
+
 static void handleMotionInfoRoute() {
     if (s_instance) s_instance->handleMotionInfo();
 }
@@ -673,6 +680,7 @@ void DashboardService::registerRoutes() {
     apiServer.registerEndpoint("GET", "/logger", handleLoggerRoute);
     apiServer.registerEndpoint("GET", "/camera", handleCameraInfoRoute);
     apiServer.registerEndpoint("GET", "/camera/stream", handleCameraStreamRoute);
+    apiServer.registerEndpoint("GET", "/camera/frame", handleCameraFrameRoute);
     apiServer.registerEndpoint("GET", "/motion", handleMotionInfoRoute);
     apiServer.registerEndpoint("POST", "/motion", handleMotionCommandRoute);
     apiServer.registerEndpoint("GET", "/vision", handleVisionInfoRoute);
@@ -925,7 +933,7 @@ void DashboardService::handleCameraStream() {
     if (!apiServer.beginStream(header)) return;
 
     unsigned long startTime = millis();
-    while (millis() - startTime < 300000 && apiServer.streamClientConnected()) {
+    while (millis() - startTime < 30000 && apiServer.streamClientConnected()) {
         cameraEngine.update();
         personTracker.update();
 
@@ -952,12 +960,31 @@ void DashboardService::handleCameraStream() {
     apiServer.endStream();
 }
 
+void DashboardService::handleCameraFrame() {
+    if (!cameraEngine.isInitialized()) {
+        apiServer.sendError(503, "Camera not initialized");
+        return;
+    }
+
+    cameraEngine.update();
+
+    uint8_t* frame = nullptr;
+    int width = 0, height = 0;
+    size_t len = 0;
+    if (!cameraEngine.getFrame(&frame, &width, &height, &len) || !frame || len == 0) {
+        apiServer.sendError(503, "Frame capture failed");
+        return;
+    }
+
+    apiServer.sendData(200, "image/jpeg", (const char*)frame, len);
+}
+
 void DashboardService::handleApiInfo() {
     apiServer.sendJson(200,
         "{\"status\":\"ok\",\"endpoints\":["
         "\"/\",\"/index.html\",\"/style.css\",\"/app.js\","
         "\"/system\",\"/network\",\"/logger\",\"/camera\","
-        "\"/camera/stream\",\"/motion\",\"/vision\",\"/detect\",\"/tracking\",\"/tracking\"(POST),"
+        "\"/camera/stream\",\"/camera/frame\",\"/motion\",\"/vision\",\"/detect\",\"/tracking\",\"/tracking\"(POST),"
         "\"/api/wifi/config\"(POST),\"/api/wifi/scan\",\"/api/wifi/status\",\"/api/info\""
         "]}");
 }

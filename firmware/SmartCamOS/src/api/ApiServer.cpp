@@ -92,6 +92,12 @@ bool ApiServer::sendResponse(int code, const char* contentType, const char* body
     return true;
 }
 
+bool ApiServer::sendData(int code, const char* contentType, const char* data, size_t len) {
+    if (!s_webServer) return false;
+    s_webServer->send(code, contentType, data, len);
+    return true;
+}
+
 bool ApiServer::sendJson(int code, const char* json) {
     return sendResponse(code, "application/json", json);
 }
