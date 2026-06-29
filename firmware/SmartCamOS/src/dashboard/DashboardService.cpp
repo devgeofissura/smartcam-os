@@ -926,8 +926,13 @@ void DashboardService::handleCameraStream() {
 
     unsigned long startTime = millis();
     while (millis() - startTime < 300000 && apiServer.streamClientConnected()) {
-        camera_fb_t* fb = esp_camera_fb_get();
-        if (!fb) {
+        cameraEngine.update();
+        personTracker.update();
+
+        uint8_t* frame = nullptr;
+        int width = 0, height = 0;
+        size_t len = 0;
+        if (!cameraEngine.getFrame(&frame, &width, &height, &len)) {
             delay(10);
             continue;
         }
@@ -935,11 +940,10 @@ void DashboardService::handleCameraStream() {
         char partHeader[128];
         int phLen = snprintf(partHeader, sizeof(partHeader),
             "\r\n--%s\r\nContent-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n",
-            boundary, fb->len);
+            boundary, (unsigned)len);
 
         apiServer.streamChunk((uint8_t*)partHeader, phLen);
-        apiServer.streamChunk(fb->buf, fb->len);
-        esp_camera_fb_return(fb);
+        apiServer.streamChunk(frame, len);
     }
 
     char trailer[32];
