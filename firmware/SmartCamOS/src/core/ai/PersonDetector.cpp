@@ -157,7 +157,6 @@ bool PersonDetector::runInference(uint8_t* frame, int width, int height, size_t 
     }
 #else
     size_t srcLen = size ? size : (width * height * 2);
-    Serial.printf("[DBG] runInference w=%d h=%d srcLen=%u\n", width, height, (unsigned)srcLen);
 
     bool detected = false;
     float confidence = 0.0f;
@@ -175,59 +174,46 @@ bool PersonDetector::runInference(uint8_t* frame, int width, int height, size_t 
         }
     }
 
-    Serial.printf("[DBG] rgbBuf=%p size=%d need=%d\n", m_rgbBuf, m_rgbBufSize, needSize);
+    if (m_rgbBuf && fmt2rgb888(frame, srcLen, PIXFORMAT_JPEG, m_rgbBuf)) {
+        int step = 1;
+        while ((width / step) * (height / step) > 320 * 240) step++;
 
-    if (m_rgbBuf) {
-        bool ok = fmt2rgb888(frame, srcLen, PIXFORMAT_JPEG, m_rgbBuf);
-        Serial.printf("[DBG] fmt2rgb888=%d\n", ok);
-        if (ok) {
-            int step = 1;
-            while ((width / step) * (height / step) > 320 * 240) step++;
-
-            int sampleCount = 0;
-            unsigned long long sum = 0;
-            for (int y = 0; y < height; y += step) {
-                for (int x = 0; x < width; x += step) {
-                    int idx = (y * width + x) * 3;
-                    sum += (m_rgbBuf[idx] * 77 + m_rgbBuf[idx + 1] * 150 + m_rgbBuf[idx + 2] * 29) >> 8;
-                    sampleCount++;
-                }
-            }
-            int mean = (int)(sum / sampleCount);
-
-            int above = 0;
-            for (int y = 0; y < height; y += step) {
-                for (int x = 0; x < width; x += step) {
-                    int idx = (y * width + x) * 3;
-                    int gray = (m_rgbBuf[idx] * 77 + m_rgbBuf[idx + 1] * 150 + m_rgbBuf[idx + 2] * 29) >> 8;
-                    if (gray > mean + 20 || gray < mean - 20) above++;
-                }
-            }
-
-            float contentRatio = (float)above / sampleCount;
-            Serial.printf("[DBG] pixel sampleCount=%d mean=%d above=%d ratio=%.3f\n", sampleCount, mean, above, contentRatio);
-            if (contentRatio > 0.05f) {
-                detected = true;
-                confidence = contentRatio > 1.0f ? 1.0f : contentRatio;
+        int sampleCount = 0;
+        unsigned long long sum = 0;
+        for (int y = 0; y < height; y += step) {
+            for (int x = 0; x < width; x += step) {
+                int idx = (y * width + x) * 3;
+                sum += (m_rgbBuf[idx] * 77 + m_rgbBuf[idx + 1] * 150 + m_rgbBuf[idx + 2] * 29) >> 8;
+                sampleCount++;
             }
         }
-    } else {
-        Serial.printf("[DBG] rgbBuf null, using jpeg heuristic\n");
+        int mean = (int)(sum / sampleCount);
+
+        int above = 0;
+        for (int y = 0; y < height; y += step) {
+            for (int x = 0; x < width; x += step) {
+                int idx = (y * width + x) * 3;
+                int gray = (m_rgbBuf[idx] * 77 + m_rgbBuf[idx + 1] * 150 + m_rgbBuf[idx + 2] * 29) >> 8;
+                if (gray > mean + 20 || gray < mean - 20) above++;
+            }
+        }
+
+        float contentRatio = (float)above / sampleCount;
+        if (contentRatio > 0.05f) {
+            detected = true;
+            confidence = contentRatio > 1.0f ? 1.0f : contentRatio;
+        }
     }
 
-    if (!detected) {
-        Serial.printf("[DBG] jpeg heuristic srcLen=%u threshold=8000\n", (unsigned)srcLen);
-        if (srcLen > 8000) {
-            detected = true;
-            float excess = (float)(srcLen - 8000);
-            confidence = excess / 72000.0f;
-            if (confidence < 0.15f) confidence = 0.15f;
-            if (confidence > 0.80f) confidence = 0.80f;
-        }
+    if (!detected && srcLen > 8000) {
+        detected = true;
+        float excess = (float)(srcLen - 8000);
+        confidence = excess / 72000.0f;
+        if (confidence < 0.15f) confidence = 0.15f;
+        if (confidence > 0.80f) confidence = 0.80f;
     }
 
     if (detected) {
-        Serial.printf("[DBG] DETECTED conf=%.3f\n", confidence);
         Detection& d = m_results[0];
         d.x = 0.5f;
         d.y = 0.5f;
@@ -238,8 +224,6 @@ bool PersonDetector::runInference(uint8_t* frame, int width, int height, size_t 
         strncpy(d.label, m_config.label, sizeof(d.label) - 1);
         d.label[sizeof(d.label) - 1] = '\0';
         m_resultCount = 1;
-    } else {
-        Serial.printf("[DBG] NOT detected\n");
     }
 #endif
 
