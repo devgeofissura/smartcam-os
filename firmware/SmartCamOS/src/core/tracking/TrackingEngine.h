@@ -36,6 +36,7 @@ public:
     int getTargetWidth() const;
     int getTargetHeight() const;
     float getTargetConfidence() const;
+    const char* getStateName() const;
 
     const char* name() const override { return "TrackingEngine"; }
 

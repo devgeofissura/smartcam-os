@@ -288,7 +288,7 @@ scanning:'Escanendo...',scan_fail:'Falha no scan',no_networks:'Nenhuma rede enco
 nets_found:' redes encontradas',select_err:'Selecione uma rede',
 saving:'Salvando e reiniciando...',saved:'Config salva, reiniciando...',
 started:' iniciado',err_data:'Erro ao carregar',not_conn:'Desconectado',
-stream:'Abrir Stream',locked:'travado',searching:'buscando',idle:'parado',
+stream:'Abrir Stream',tracking:'rastreando',locked:'travado',searching:'buscando',lost:'perdido',idle:'parado',
 uptime:'Ativo há',cpu:'CPU',sketch:'Sketch',free_sketch:'Sketch Livre',
 free_heap:'Heap Livre',min_heap:'Heap Mín',free_psram:'PSRAM Livre',total_psram:'PSRAM Total',
 ip:'IP',ssid:'Rede',signal:'Sinal',mac:'MAC',
@@ -315,7 +315,7 @@ scanning:'Scanning...',scan_fail:'Scan failed',no_networks:'No networks found',
 nets_found:' networks found',select_err:'Select a network',
 saving:'Saving and rebooting...',saved:'Config saved, rebooting...',
 started:' started',err_data:'Error loading data',not_conn:'Not connected',
-stream:'Open Stream',locked:'locked',searching:'searching',idle:'idle',
+stream:'Open Stream',tracking:'tracking',locked:'locked',searching:'searching',lost:'lost',idle:'idle',
 uptime:'Uptime',cpu:'CPU',sketch:'Sketch',free_sketch:'Free Sketch',
 free_heap:'Free Heap',min_heap:'Min Heap',free_psram:'Free PSRAM',total_psram:'Total PSRAM',
 ip:'IP',ssid:'SSID',signal:'Signal',mac:'MAC',
@@ -530,7 +530,11 @@ var c=document.getElementById('track-correction');
 var p=document.getElementById('track-pos');
 var sz=document.getElementById('track-size');
 var cf=document.getElementById('track-conf');
-if(s)s.textContent=d.locked?_('locked'):d.target?_(d.target):_('searching');
+if(s){
+var label=d.state||(d.locked?'tracking':'searching');
+s.textContent=_(label);
+s.style.color=(d.state==='tracking')?'var(--green)':(d.state==='searching')?'var(--yellow)':(d.state==='lost')?'var(--red)':'var(--comment)';
+}
 if(c)c.textContent=d.correction.toFixed(4);
 if(p)p.textContent='('+d.tx+', '+d.ty+')';
 if(sz)sz.textContent=d.tw+'x'+d.th;
@@ -863,9 +867,10 @@ void DashboardService::handleDetectionInfo() {
 void DashboardService::handleTrackingInfo() {
     char buf[512];
     snprintf(buf, sizeof(buf),
-        "{\"status\":\"ok\",\"locked\":%s,\"correction\":%.4f,"
+        "{\"status\":\"ok\",\"locked\":%s,\"state\":\"%s\",\"correction\":%.4f,"
         "\"tx\":%d,\"ty\":%d,\"tw\":%d,\"th\":%d,\"conf\":%.2f}",
         trackingEngine.isTargetLocked() ? "true" : "false",
+        trackingEngine.getStateName(),
         trackingEngine.getCorrectionAngle(),
         trackingEngine.getTargetX(),
         trackingEngine.getTargetY(),

@@ -201,3 +201,12 @@ int TrackingEngine::getTargetY() const { return (int)(m_target.y * 100); }
 int TrackingEngine::getTargetWidth() const { return (int)(m_target.width * 100); }
 int TrackingEngine::getTargetHeight() const { return (int)(m_target.height * 100); }
 float TrackingEngine::getTargetConfidence() const { return m_target.confidence; }
+const char* TrackingEngine::getStateName() const {
+    switch (m_state) {
+        case TrackState::Idle: return "idle";
+        case TrackState::Tracking: return "tracking";
+        case TrackState::TargetLost: return "lost";
+        case TrackState::Searching: return "searching";
+        default: return "unknown";
+    }
+}

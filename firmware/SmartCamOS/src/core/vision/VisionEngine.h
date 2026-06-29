@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "../../sdk/interfaces/SmartCamModule.h"
 #include "../../sdk/interfaces/IFrameProcessor.h"
+#include "../../sdk/interfaces/IDetector.h"
 
 struct Blob {
     float x;
@@ -42,6 +43,8 @@ public:
     bool colorFilter(Frame& frame, const ColorRange& range);
     int findBlobs(const Frame& frame, Blob* out, int maxCount);
     bool drawOverlay(Frame& frame, const Blob& blob);
+    bool drawOverlay(Frame& frame, const Detection& det, uint16_t color);
+    bool drawOverlay(Frame& frame, const Detection& det);
 
     // Working buffer access for processed frames
     uint8_t* getWorkingBuffer() const;

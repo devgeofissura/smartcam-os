@@ -288,6 +288,39 @@ bool VisionEngine::drawOverlay(Frame& frame, const Blob& blob) {
     return true;
 }
 
+bool VisionEngine::drawOverlay(Frame& frame, const Detection& det, uint16_t color) {
+    if (!frame.data || frame.bytesPerPixel < 2) return false;
+
+    int width = frame.width;
+    int height = frame.height;
+    uint16_t* pixels = (uint16_t*)frame.data;
+
+    int x1 = (int)((det.x - det.width / 2.0f) * width);
+    int y1 = (int)((det.y - det.height / 2.0f) * height);
+    int x2 = (int)((det.x + det.width / 2.0f) * width);
+    int y2 = (int)((det.y + det.height / 2.0f) * height);
+
+    if (x1 < 0) x1 = 0;
+    if (y1 < 0) y1 = 0;
+    if (x2 >= width) x2 = width - 1;
+    if (y2 >= height) y2 = height - 1;
+
+    for (int x = x1; x <= x2; x++) {
+        pixels[y1 * width + x] = color;
+        pixels[y2 * width + x] = color;
+    }
+    for (int y = y1; y <= y2; y++) {
+        pixels[y * width + x1] = color;
+        pixels[y * width + x2] = color;
+    }
+
+    return true;
+}
+
+bool VisionEngine::drawOverlay(Frame& frame, const Detection& det) {
+    return drawOverlay(frame, det, 0x07E0);
+}
+
 uint8_t* VisionEngine::getWorkingBuffer() const {
     return m_workBuffer;
 }
